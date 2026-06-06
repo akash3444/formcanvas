@@ -1,0 +1,380 @@
+"use client"
+
+import { useEffect } from "react"
+import { useForm, Controller } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { z } from "zod"
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/components/ui/field"
+import type { FormField } from "@/lib/form-builder/types"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Switch } from "@/components/ui/switch"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Button } from "@/components/ui/button"
+
+// ---------------------------------------------------------------------------
+// Dynamic schema builder
+// ---------------------------------------------------------------------------
+
+function buildSchema(fields: FormField[]) {
+  const shape: Record<string, z.ZodTypeAny> = {}
+  for (const field of fields) {
+    switch (field.type) {
+      case "input":
+        shape[field.name] = field.required
+          ? z.string().min(1, "This field is required")
+          : z.string()
+        break
+      case "textarea":
+        shape[field.name] = field.required
+          ? z.string().min(1, "This field is required")
+          : z.string()
+        break
+      case "checkbox":
+      case "switch":
+        shape[field.name] = field.required
+          ? z.boolean().refine((v) => v === true, "This field is required")
+          : z.boolean()
+        break
+      case "select":
+      case "radio-group":
+        shape[field.name] = field.required
+          ? z.string().min(1, "Please select an option")
+          : z.string()
+        break
+    }
+  }
+  return z.object(shape)
+}
+
+function buildDefaultValues(fields: FormField[]): Record<string, unknown> {
+  const defaults: Record<string, unknown> = {}
+  for (const field of fields) {
+    switch (field.type) {
+      case "input":
+      case "textarea":
+      case "select":
+      case "radio-group":
+        defaults[field.name] = ""
+        break
+      case "checkbox":
+      case "switch":
+        defaults[field.name] = false
+        break
+    }
+  }
+  return defaults
+}
+
+// ---------------------------------------------------------------------------
+// Individual field renderers
+// ---------------------------------------------------------------------------
+
+function FieldWrapper({
+  label,
+  required,
+  description,
+  error,
+  children,
+}: {
+  label: string
+  required: boolean
+  description: string
+  error?: string
+  children: React.ReactNode
+}) {
+  return (
+    <Field data-invalid={!!error}>
+      <FieldLabel className="text-sm leading-none font-medium">
+        {label}
+        {required && <span className="ml-1 text-destructive">*</span>}
+      </FieldLabel>
+      {children}
+      {description && <FieldDescription>{description}</FieldDescription>}
+      {error && <FieldError>{error}</FieldError>}
+    </Field>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Main preview form
+// ---------------------------------------------------------------------------
+
+interface PreviewFormProps {
+  formName: string
+  submitLabel: string
+  fields: FormField[]
+}
+
+export function PreviewForm({
+  formName,
+  submitLabel,
+  fields,
+}: PreviewFormProps) {
+  const schema = buildSchema(fields)
+  type FormValues = z.infer<typeof schema>
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: buildDefaultValues(fields) as FormValues,
+  })
+
+  // Reset form when fields change to avoid stale field state
+  useEffect(() => {
+    form.reset(buildDefaultValues(fields) as FormValues)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(fields.map((f) => f.name))])
+
+  function onSubmit(values: FormValues) {
+    console.log("Form submitted:", values)
+  }
+
+  if (fields.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-2 py-16 text-center">
+        <p className="text-sm text-muted-foreground">
+          Your form preview will appear here
+        </p>
+        <p className="text-xs text-muted-foreground">
+          Add fields from the left panel to get started
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="mx-auto w-full max-w-md">
+      {formName && <h2 className="mb-6 text-xl font-semibold">{formName}</h2>}
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-5"
+        noValidate
+      >
+        {fields.map((field) => {
+          const error = form.formState.errors[field.name]?.message as
+            | string
+            | undefined
+
+          switch (field.type) {
+            case "input":
+              return (
+                <FieldWrapper
+                  key={field.id}
+                  label={field.label}
+                  required={field.required}
+                  description={field.description}
+                  error={error}
+                >
+                  <Controller
+                    name={field.name}
+                    control={form.control}
+                    render={({ field: f, fieldState }) => (
+                      <Input
+                        type={field.inputType}
+                        placeholder={field.placeholder}
+                        disabled={field.disabled}
+                        aria-invalid={fieldState.invalid}
+                        value={f.value as string}
+                        onChange={f.onChange}
+                        onBlur={f.onBlur}
+                        name={f.name}
+                        ref={f.ref}
+                      />
+                    )}
+                  />
+                </FieldWrapper>
+              )
+
+            case "textarea":
+              return (
+                <FieldWrapper
+                  key={field.id}
+                  label={field.label}
+                  required={field.required}
+                  description={field.description}
+                  error={error}
+                >
+                  <Controller
+                    name={field.name}
+                    control={form.control}
+                    render={({ field: f, fieldState }) => (
+                      <Textarea
+                        placeholder={field.placeholder}
+                        rows={field.rows}
+                        disabled={field.disabled}
+                        aria-invalid={fieldState.invalid}
+                        className="resize-none"
+                        value={f.value as string}
+                        onChange={f.onChange}
+                        onBlur={f.onBlur}
+                        name={f.name}
+                        ref={f.ref}
+                      />
+                    )}
+                  />
+                </FieldWrapper>
+              )
+
+            case "checkbox":
+              return (
+                <Field key={field.id} data-invalid={!!error}>
+                  <div className="flex items-start gap-3 rounded-md border p-4">
+                    <Controller
+                      name={field.name}
+                      control={form.control}
+                      render={({ field: f }) => (
+                        <Checkbox
+                          checked={Boolean(f.value)}
+                          onCheckedChange={f.onChange}
+                          disabled={field.disabled}
+                          aria-invalid={!!error}
+                        />
+                      )}
+                    />
+                    <div className="flex flex-col gap-1">
+                      <FieldLabel className="text-sm leading-none font-medium">
+                        {field.label}
+                        {field.required && (
+                          <span className="ml-1 text-destructive">*</span>
+                        )}
+                      </FieldLabel>
+                      {field.description && (
+                        <FieldDescription>{field.description}</FieldDescription>
+                      )}
+                    </div>
+                  </div>
+                  {error && <FieldError>{error}</FieldError>}
+                </Field>
+              )
+
+            case "switch":
+              return (
+                <Field key={field.id} data-invalid={!!error}>
+                  <div className="flex items-center justify-between rounded-md border p-4">
+                    <div className="flex flex-col gap-0.5">
+                      <FieldLabel className="text-sm font-medium">
+                        {field.label}
+                        {field.required && (
+                          <span className="ml-1 text-destructive">*</span>
+                        )}
+                      </FieldLabel>
+                      {field.description && (
+                        <FieldDescription>{field.description}</FieldDescription>
+                      )}
+                    </div>
+                    <Controller
+                      name={field.name}
+                      control={form.control}
+                      render={({ field: f }) => (
+                        <Switch
+                          checked={Boolean(f.value)}
+                          onCheckedChange={f.onChange}
+                          disabled={field.disabled}
+                        />
+                      )}
+                    />
+                  </div>
+                  {error && <FieldError>{error}</FieldError>}
+                </Field>
+              )
+
+            case "select":
+              return (
+                <FieldWrapper
+                  key={field.id}
+                  label={field.label}
+                  required={field.required}
+                  description={field.description}
+                  error={error}
+                >
+                  <Controller
+                    name={field.name}
+                    control={form.control}
+                    render={({ field: f, fieldState }) => (
+                      <Select
+                        value={String(f.value ?? "")}
+                        onValueChange={f.onChange}
+                      >
+                        <SelectTrigger
+                          aria-invalid={fieldState.invalid}
+                          className="w-full"
+                        >
+                          <SelectValue
+                            placeholder={
+                              field.placeholder || "Select an option"
+                            }
+                          />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {field.options.map((opt) => (
+                            <SelectItem key={opt.id} value={opt.value}>
+                              {opt.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                </FieldWrapper>
+              )
+
+            case "radio-group":
+              return (
+                <FieldWrapper
+                  key={field.id}
+                  label={field.label}
+                  required={field.required}
+                  description={field.description}
+                  error={error}
+                >
+                  <Controller
+                    name={field.name}
+                    control={form.control}
+                    render={({ field: f }) => (
+                      <RadioGroup
+                        value={String(f.value ?? "")}
+                        onValueChange={f.onChange}
+                        disabled={field.disabled}
+                      >
+                        {field.options.map((opt) => (
+                          <div key={opt.id} className="flex items-center gap-2">
+                            <RadioGroupItem
+                              value={opt.value}
+                              id={`${field.name}-${opt.value}`}
+                            />
+                            <label
+                              htmlFor={`${field.name}-${opt.value}`}
+                              className="cursor-pointer text-sm font-medium"
+                            >
+                              {opt.label}
+                            </label>
+                          </div>
+                        ))}
+                      </RadioGroup>
+                    )}
+                  />
+                </FieldWrapper>
+              )
+          }
+        })}
+
+        <Button type="submit" className="w-full" size="lg">
+          {submitLabel}
+        </Button>
+      </form>
+    </div>
+  )
+}

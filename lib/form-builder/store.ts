@@ -1,0 +1,181 @@
+import { create } from "zustand"
+import { persist, createJSONStorage } from "zustand/middleware"
+import { arrayMove } from "@dnd-kit/sortable"
+import type { FormField, FieldType, FieldOption } from "./types"
+import { labelToKey, generateId } from "./utils"
+
+interface FormBuilderState {
+  formName: string
+  submitLabel: string
+  fields: FormField[]
+  selectedFieldId: string | null
+}
+
+interface FormBuilderActions {
+  setFormName: (name: string) => void
+  setSubmitLabel: (label: string) => void
+  addField: (type: FieldType) => void
+  removeField: (id: string) => void
+  updateField: (id: string, updates: Partial<FormField>) => void
+  reorderFields: (activeId: string, overId: string) => void
+  selectField: (id: string | null) => void
+  addOption: (fieldId: string) => void
+  updateOption: (fieldId: string, optionId: string, updates: Partial<FieldOption>) => void
+  removeOption: (fieldId: string, optionId: string) => void
+  clearForm: () => void
+}
+
+type FormBuilderStore = FormBuilderState & FormBuilderActions
+
+const defaultFieldNames: Record<FieldType, string> = {
+  input: "Text Field",
+  textarea: "Text Area",
+  checkbox: "Checkbox",
+  switch: "Switch",
+  select: "Select",
+  "radio-group": "Radio Group",
+}
+
+function createDefaultField(type: FieldType): FormField {
+  const label = defaultFieldNames[type]
+  const base = {
+    id: generateId(),
+    label,
+    name: labelToKey(label),
+    placeholder: "",
+    description: "",
+    required: false,
+    disabled: false,
+  }
+
+  const defaultOptions: FieldOption[] = [
+    { id: generateId(), label: "Option 1", value: "option-1" },
+    { id: generateId(), label: "Option 2", value: "option-2" },
+  ]
+
+  switch (type) {
+    case "input":
+      return { ...base, type: "input", inputType: "text" }
+    case "textarea":
+      return { ...base, type: "textarea", rows: 3 }
+    case "checkbox":
+      return { ...base, type: "checkbox" }
+    case "switch":
+      return { ...base, type: "switch" }
+    case "select":
+      return { ...base, type: "select", options: defaultOptions }
+    case "radio-group":
+      return { ...base, type: "radio-group", options: defaultOptions }
+  }
+}
+
+const initialState: FormBuilderState = {
+  formName: "My Form",
+  submitLabel: "Submit",
+  fields: [],
+  selectedFieldId: null,
+}
+
+export const useFormBuilderStore = create<FormBuilderStore>()(
+  persist(
+    (set) => ({
+      ...initialState,
+
+      setFormName: (formName) => set({ formName }),
+      setSubmitLabel: (submitLabel) => set({ submitLabel }),
+
+      addField: (type) =>
+        set((state) => {
+          const field = createDefaultField(type)
+          return {
+            fields: [...state.fields, field],
+            selectedFieldId: field.id,
+          }
+        }),
+
+      removeField: (id) =>
+        set((state) => ({
+          fields: state.fields.filter((f) => f.id !== id),
+          selectedFieldId:
+            state.selectedFieldId === id ? null : state.selectedFieldId,
+        })),
+
+      updateField: (id, updates) =>
+        set((state) => ({
+          fields: state.fields.map((f) =>
+            f.id === id ? ({ ...f, ...updates } as FormField) : f
+          ),
+        })),
+
+      reorderFields: (activeId, overId) =>
+        set((state) => {
+          const oldIndex = state.fields.findIndex((f) => f.id === activeId)
+          const newIndex = state.fields.findIndex((f) => f.id === overId)
+          return { fields: arrayMove(state.fields, oldIndex, newIndex) }
+        }),
+
+      selectField: (id) => set({ selectedFieldId: id }),
+
+      addOption: (fieldId) =>
+        set((state) => ({
+          fields: state.fields.map((f) => {
+            if (
+              f.id !== fieldId ||
+              (f.type !== "select" && f.type !== "radio-group")
+            )
+              return f
+            const n = f.options.length + 1
+            return {
+              ...f,
+              options: [
+                ...f.options,
+                {
+                  id: generateId(),
+                  label: `Option ${n}`,
+                  value: `option-${n}`,
+                },
+              ],
+            }
+          }),
+        })),
+
+      updateOption: (fieldId, optionId, updates) =>
+        set((state) => ({
+          fields: state.fields.map((f) => {
+            if (
+              f.id !== fieldId ||
+              (f.type !== "select" && f.type !== "radio-group")
+            )
+              return f
+            return {
+              ...f,
+              options: f.options.map((o) =>
+                o.id === optionId ? { ...o, ...updates } : o
+              ),
+            }
+          }),
+        })),
+
+      removeOption: (fieldId, optionId) =>
+        set((state) => ({
+          fields: state.fields.map((f) => {
+            if (
+              f.id !== fieldId ||
+              (f.type !== "select" && f.type !== "radio-group")
+            )
+              return f
+            return {
+              ...f,
+              options: f.options.filter((o) => o.id !== optionId),
+            }
+          }),
+        })),
+
+      clearForm: () => set({ ...initialState, fields: [] }),
+    }),
+    {
+      name: "shadcn-form-builder",
+      storage: createJSONStorage(() => localStorage),
+    }
+  )
+)
