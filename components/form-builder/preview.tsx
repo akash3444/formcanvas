@@ -1,9 +1,9 @@
 "use client"
 
-import { useFormBuilderStore } from "@/lib/form-builder/store"
-import { generateFormCode } from "@/lib/form-builder/code-generator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { generateFormCode } from "@/lib/form-builder/code-generator"
+import { useFormBuilderStore } from "@/lib/form-builder/store"
+import { CodeBlock } from "./code-block"
 import { CopyButton } from "./copy-button"
 import { PreviewForm } from "./preview-form"
 
@@ -12,7 +12,10 @@ export function FormPreview() {
   const code = generateFormCode(formName, submitLabel, fields)
 
   return (
-    <Tabs defaultValue="preview" className="flex h-full flex-col">
+    <Tabs
+      defaultValue="preview"
+      className="flex h-full flex-col overflow-hidden"
+    >
       <div className="flex shrink-0 items-center justify-between border-b px-4 py-2">
         <TabsList>
           <TabsTrigger value="preview" className="text-xs">
@@ -31,22 +34,16 @@ export function FormPreview() {
         </TabsContent>
       </div>
 
-      <TabsContent value="preview" className="m-0 flex-1 overflow-hidden">
-        <ScrollArea className="h-full">
-          <div className="p-6">
-            <PreviewForm
-              formName={formName}
-              submitLabel={submitLabel}
-              fields={fields}
-            />
-          </div>
-        </ScrollArea>
+      <TabsContent value="preview" className="m-0 flex-1 overflow-y-auto p-6">
+        <PreviewForm
+          formName={formName}
+          submitLabel={submitLabel}
+          fields={fields}
+        />
       </TabsContent>
 
-      <TabsContent value="code" className="m-0 flex-1 overflow-hidden">
-        <pre className="p-4 font-mono text-xs leading-relaxed">
-          <code>{code}</code>
-        </pre>
+      <TabsContent value="code" className="m-0 flex-1 overflow-auto">
+        <CodeBlock code={code} />
       </TabsContent>
     </Tabs>
   )
