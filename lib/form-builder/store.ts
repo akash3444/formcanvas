@@ -34,6 +34,7 @@ const defaultFieldNames: Record<FieldType, string> = {
   switch: "Switch",
   select: "Select",
   "radio-group": "Radio Group",
+  "checkbox-group": "Checkbox Group",
 }
 
 function createDefaultField(type: FieldType): FormField {
@@ -66,6 +67,8 @@ function createDefaultField(type: FieldType): FormField {
       return { ...base, type: "select", options: defaultOptions }
     case "radio-group":
       return { ...base, type: "radio-group", options: defaultOptions }
+    case "checkbox-group":
+      return { ...base, type: "checkbox-group", options: defaultOptions, orientation: "vertical" }
   }
 }
 
@@ -127,7 +130,7 @@ export const useFormBuilderStore = create<FormBuilderStore>()(
           fields: state.fields.map((f) => {
             if (
               f.id !== fieldId ||
-              (f.type !== "select" && f.type !== "radio-group")
+              (f.type !== "select" && f.type !== "radio-group" && f.type !== "checkbox-group")
             )
               return f
             const existingValues = new Set(f.options.map((o) => o.value))
@@ -152,7 +155,7 @@ export const useFormBuilderStore = create<FormBuilderStore>()(
           fields: state.fields.map((f) => {
             if (
               f.id !== fieldId ||
-              (f.type !== "select" && f.type !== "radio-group")
+              (f.type !== "select" && f.type !== "radio-group" && f.type !== "checkbox-group")
             )
               return f
             return {
@@ -169,7 +172,7 @@ export const useFormBuilderStore = create<FormBuilderStore>()(
           fields: state.fields.map((f) => {
             if (
               f.id !== fieldId ||
-              (f.type !== "select" && f.type !== "radio-group")
+              (f.type !== "select" && f.type !== "radio-group" && f.type !== "checkbox-group")
             )
               return f
             return {

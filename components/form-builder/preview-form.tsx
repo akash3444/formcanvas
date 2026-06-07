@@ -5,6 +5,7 @@ import { EyeIcon } from "lucide-react"
 import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
+import { toast } from "sonner"
 import {
   Field,
   FieldDescription,
@@ -45,7 +46,9 @@ function buildSchema(fields: FormField[]) {
         let s = z.string()
         if (field.inputType === "email") s = s.email("Invalid email address")
         if (field.inputType === "url") s = s.url("Invalid URL")
-        shape[field.name] = field.required ? s.min(1, "This field is required") : s
+        shape[field.name] = field.required
+          ? s.min(1, "This field is required")
+          : s
         break
       }
       case "textarea":
@@ -65,6 +68,11 @@ function buildSchema(fields: FormField[]) {
           ? z.string().min(1, "Please select an option")
           : z.string()
         break
+      case "checkbox-group":
+        shape[field.name] = field.required
+          ? z.array(z.string()).min(1, "Select at least one option")
+          : z.array(z.string()).default([])
+        break
     }
   }
   return z.object(shape)
@@ -83,6 +91,9 @@ function buildDefaultValues(fields: FormField[]): Record<string, unknown> {
       case "checkbox":
       case "switch":
         defaults[field.name] = false
+        break
+      case "checkbox-group":
+        defaults[field.name] = []
         break
     }
   }
@@ -110,7 +121,10 @@ function FieldWrapper({
 }) {
   return (
     <Field data-invalid={!!error}>
-      <FieldLabel htmlFor={htmlFor} className="text-sm leading-none font-medium">
+      <FieldLabel
+        htmlFor={htmlFor}
+        className="text-sm leading-none font-medium"
+      >
         {label}
         {required && <span className="ml-1 text-destructive">*</span>}
       </FieldLabel>
@@ -151,7 +165,13 @@ export function PreviewForm({
   }, [JSON.stringify(fields.map((f) => f.name))])
 
   function onSubmit(values: FormValues) {
-    console.log("Form submitted:", values)
+    toast.message("Form submitted", {
+      description: (
+        <pre className="mt-1 max-h-48 overflow-auto rounded bg-background/5 text-xs">
+          {JSON.stringify(values, null, 2)}
+        </pre>
+      ),
+    })
   }
 
   if (fields.length === 0) {
@@ -265,7 +285,10 @@ export function PreviewForm({
                       )}
                     />
                     <div className="flex flex-col gap-1">
-                      <FieldLabel htmlFor={field.name} className="text-sm leading-none font-medium">
+                      <FieldLabel
+                        htmlFor={field.name}
+                        className="text-sm leading-none font-medium"
+                      >
                         {field.label}
                         {field.required && (
                           <span className="ml-1 text-destructive">*</span>
@@ -285,7 +308,10 @@ export function PreviewForm({
                 <Field key={field.id} data-invalid={!!error}>
                   <div className="flex items-center justify-between">
                     <div className="flex flex-col gap-0.5">
-                      <FieldLabel htmlFor={field.name} className="text-sm font-medium">
+                      <FieldLabel
+                        htmlFor={field.name}
+                        className="text-sm font-medium"
+                      >
                         {field.label}
                         {field.required && (
                           <span className="ml-1 text-destructive">*</span>
@@ -390,6 +416,55 @@ export function PreviewForm({
                     )}
                   />
                 </FieldWrapper>
+              )
+
+            case "checkbox-group":
+              return (
+                <Field key={field.id} data-invalid={!!error}>
+                  <FieldLabel className="text-sm leading-none font-medium">
+                    {field.label}
+                    {field.required && (
+                      <span className="ml-1 text-destructive">*</span>
+                    )}
+                  </FieldLabel>
+                  <Controller
+                    name={field.name}
+                    control={form.control}
+                    render={({ field: f }) => (
+                      <Field orientation={field.orientation}>
+                        {field.options.map((opt) => (
+                          <div key={opt.id} className="flex items-center gap-2">
+                            <Checkbox
+                              id={`${field.name}-${opt.value}`}
+                              checked={((f.value as string[]) ?? []).includes(
+                                opt.value
+                              )}
+                              onCheckedChange={(checked) => {
+                                const current = (f.value as string[]) ?? []
+                                f.onChange(
+                                  checked
+                                    ? [...current, opt.value]
+                                    : current.filter((v) => v !== opt.value)
+                                )
+                              }}
+                              disabled={field.disabled}
+                            />
+                            <label
+                              htmlFor={`${field.name}-${opt.value}`}
+                              className="cursor-pointer text-sm font-medium"
+                            >
+                              {opt.label}
+                            </label>
+                          </div>
+                        ))}
+                      </Field>
+                    )}
+                  />
+                  {field.description && (
+                    <FieldDescription>{field.description}</FieldDescription>
+                  )}
+                  {error && <FieldError>{error}</FieldError>}
+                </Field>
               )
           }
         })}

@@ -5,6 +5,7 @@ export type FieldType =
   | "switch"
   | "select"
   | "radio-group"
+  | "checkbox-group"
 
 export type InputType = "text" | "email" | "password" | "url" | "tel"
 
@@ -52,6 +53,14 @@ export interface RadioGroupField extends BaseField {
   options: FieldOption[]
 }
 
+export type CheckboxGroupOrientation = "vertical" | "horizontal" | "responsive"
+
+export interface CheckboxGroupField extends BaseField {
+  type: "checkbox-group"
+  options: FieldOption[]
+  orientation: CheckboxGroupOrientation
+}
+
 export type FormField =
   | InputField
   | TextareaField
@@ -59,3 +68,4 @@ export type FormField =
   | SwitchField
   | SelectField
   | RadioGroupField
+  | CheckboxGroupField
