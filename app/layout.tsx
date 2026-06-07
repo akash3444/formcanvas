@@ -1,5 +1,7 @@
 import { Geist_Mono, Space_Grotesk } from "next/font/google"
 
+import { Toaster } from "sonner"
+
 import { ThemeProvider } from "@/components/theme-provider"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
@@ -34,6 +36,7 @@ export default function RootLayout({
       <body>
         <ThemeProvider>
           <TooltipProvider delay={300}>{children}</TooltipProvider>
+          <Toaster richColors closeButton />
         </ThemeProvider>
       </body>
     </html>

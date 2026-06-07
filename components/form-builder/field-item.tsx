@@ -12,6 +12,7 @@ import {
   ToggleLeft,
   ChevronsUpDown,
   CircleDot,
+  ListChecks,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import type { FormField, FieldType } from "@/lib/form-builder/types"
@@ -26,6 +27,7 @@ const FIELD_ICONS: Record<FieldType, LucideIcon> = {
   switch: ToggleLeft,
   select: ChevronsUpDown,
   "radio-group": CircleDot,
+  "checkbox-group": ListChecks,
 }
 
 const FIELD_LABELS: Record<FieldType, string> = {
@@ -35,6 +37,7 @@ const FIELD_LABELS: Record<FieldType, string> = {
   switch: "Switch",
   select: "Select",
   "radio-group": "Radio Group",
+  "checkbox-group": "Checkbox Group",
 }
 
 interface FieldItemProps {

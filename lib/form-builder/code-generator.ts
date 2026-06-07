@@ -1,4 +1,4 @@
-import type { FormField, InputField, TextareaField, SelectField, RadioGroupField } from "./types"
+import type { FormField, InputField, TextareaField, SelectField, RadioGroupField, CheckboxGroupField } from "./types"
 import { toPascalCase } from "./utils"
 
 function getZodType(field: FormField): string {
@@ -27,6 +27,10 @@ function getZodType(field: FormField): string {
       if (field.required) base += '.min(1, "Please select an option")'
       return base
     }
+    case "checkbox-group":
+      return field.required
+        ? 'z.array(z.string()).min(1, "Select at least one option")'
+        : "z.array(z.string()).default([])"
   }
 }
 
@@ -40,6 +44,8 @@ function getDefaultValue(field: FormField): string {
     case "checkbox":
     case "switch":
       return "false"
+    case "checkbox-group":
+      return "[]"
   }
 }
 
@@ -230,6 +236,48 @@ ${radioItems}
   />${descEl}${errorEl}
 </Field>`
     }
+
+    case "checkbox-group": {
+      const f = field as CheckboxGroupField
+      const optionsArray = f.options
+        .map((o) => `          { label: "${o.label}", value: "${o.value}" },`)
+        .join("\n")
+      return `<Field data-invalid={!!form.formState.errors.${f.name}}>
+  <FieldLabel className="text-sm leading-none font-medium">
+    ${label}${requiredSpan}
+  </FieldLabel>
+  <Controller
+    name="${f.name}"
+    control={form.control}
+    render={({ field }) => (
+      <Field orientation="${f.orientation}">
+        {[
+${optionsArray}
+        ].map((option) => (
+          <div key={option.value} className="flex items-center gap-2">
+            <Checkbox
+              id={\`${f.name}-\${option.value}\`}
+              checked={(field.value ?? []).includes(option.value)}
+              onCheckedChange={(checked) => {
+                const current = field.value ?? []
+                field.onChange(
+                  checked
+                    ? [...current, option.value]
+                    : current.filter((v) => v !== option.value)
+                )
+              }}
+              disabled={${f.disabled}}
+            />
+            <label htmlFor={\`${f.name}-\${option.value}\`} className="cursor-pointer text-sm font-medium">
+              {option.label}
+            </label>
+          </div>
+        ))}
+      </Field>
+    )}
+  />${descEl}${errorEl}
+</Field>`
+    }
   }
 }
 
@@ -248,7 +296,7 @@ function getRequiredImports(fields: FormField[]): string {
 
   if (types.has("input")) imports.push('import { Input } from "@/components/ui/input"')
   if (types.has("textarea")) imports.push('import { Textarea } from "@/components/ui/textarea"')
-  if (types.has("checkbox")) imports.push('import { Checkbox } from "@/components/ui/checkbox"')
+  if (types.has("checkbox") || types.has("checkbox-group")) imports.push('import { Checkbox } from "@/components/ui/checkbox"')
   if (types.has("switch")) imports.push('import { Switch } from "@/components/ui/switch"')
   if (types.has("select"))
     imports.push(

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react"
 import { PlusIcon, Trash2Icon } from "lucide-react"
-import type { FormField, InputType } from "@/lib/form-builder/types"
+import type { FormField, InputType, CheckboxGroupOrientation } from "@/lib/form-builder/types"
 import { useFormBuilderStore } from "@/lib/form-builder/store"
 import { labelToKey } from "@/lib/form-builder/utils"
 import { Input } from "@/components/ui/input"
@@ -112,7 +112,7 @@ export function FieldConfig({ field }: FieldConfigProps) {
           />
         </LabeledRow>
 
-        {field.type !== "checkbox" && field.type !== "switch" && (
+        {field.type !== "checkbox" && field.type !== "switch" && field.type !== "checkbox-group" && (
           <LabeledRow label="Placeholder" htmlFor={`placeholder-${field.id}`}>
             <Input
               id={`placeholder-${field.id}`}
@@ -203,8 +203,32 @@ export function FieldConfig({ field }: FieldConfigProps) {
         </>
       )}
 
-      {/* Select / RadioGroup: options editor */}
-      {(field.type === "select" || field.type === "radio-group") && (
+      {/* CheckboxGroup-specific: orientation selector */}
+      {field.type === "checkbox-group" && (
+        <>
+          <Separator />
+          <LabeledRow label="Orientation">
+            <Select
+              value={field.orientation}
+              onValueChange={(v) =>
+                updateField(field.id, { orientation: v as CheckboxGroupOrientation })
+              }
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="vertical">Vertical</SelectItem>
+                <SelectItem value="horizontal">Horizontal</SelectItem>
+                <SelectItem value="responsive">Responsive</SelectItem>
+              </SelectContent>
+            </Select>
+          </LabeledRow>
+        </>
+      )}
+
+      {/* Select / RadioGroup / CheckboxGroup: options editor */}
+      {(field.type === "select" || field.type === "radio-group" || field.type === "checkbox-group") && (
         <>
           <Separator />
           <div className="space-y-2">

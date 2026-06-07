@@ -7,6 +7,7 @@ import {
   ToggleLeft,
   ChevronsUpDown,
   CircleDot,
+  ListChecks,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import type { FieldType } from "@/lib/form-builder/types"
@@ -45,6 +46,12 @@ const PALETTE_ITEMS: PaletteItem[] = [
     label: "Checkbox",
     description: "Boolean toggle with label",
     icon: CheckSquare,
+  },
+  {
+    type: "checkbox-group",
+    label: "Checkbox Group",
+    description: "Multiple choices from a list",
+    icon: ListChecks,
   },
   {
     type: "switch",
