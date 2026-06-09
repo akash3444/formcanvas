@@ -247,8 +247,9 @@ describe('generateFormCode — select field', () => {
 
   it('renders a SelectItem for each option', () => {
     const code = generateFormCode('My Form', 'Submit', [makeSelect()])
-    expect(code).toContain('<SelectItem value="usa">USA</SelectItem>')
-    expect(code).toContain('<SelectItem value="uk">UK</SelectItem>')
+    expect(code).toContain('{ label: "USA", value: "usa" }')
+    expect(code).toContain('{ label: "UK", value: "uk" }')
+    expect(code).toContain('<SelectItem key={o.value} value={o.value}>')
   })
 
   // TDD: select fields have a disabled prop like all other field types.
@@ -272,8 +273,9 @@ describe('generateFormCode — radio-group field', () => {
 
   it('renders a RadioGroupItem for each option', () => {
     const code = generateFormCode('My Form', 'Submit', [makeRadioGroup()])
-    expect(code).toContain('<RadioGroupItem value="male"')
-    expect(code).toContain('<RadioGroupItem value="female"')
+    expect(code).toContain('{ label: "Male", value: "male" }')
+    expect(code).toContain('{ label: "Female", value: "female" }')
+    expect(code).toContain('<RadioGroupItem value={o.value}')
   })
 })
 

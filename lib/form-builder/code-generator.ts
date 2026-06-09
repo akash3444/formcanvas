@@ -27,7 +27,7 @@ function getZodType(field: FormField): string {
     case "switch":
       return field.required
         ? 'z.boolean().refine((val) => val === true, "This field is required")'
-        : "z.boolean()"
+        : "z.boolean().default(false)"
     case "select":
     case "radio-group": {
       let base = "z.string()"
@@ -94,15 +94,13 @@ function generateFieldJSX(field: FormField): string {
     ? `\n  <FieldDescription>${description}</FieldDescription>`
     : ""
 
-  const errorEl = `\n  {form.formState.errors.${field.name} && (
-    <FieldError>{form.formState.errors.${field.name}?.message}</FieldError>
-  )}`
+  const errorEl = `\n  <FieldError>{form.formState.errors.${field.name}?.message}</FieldError>`
 
   switch (field.type) {
     case "input": {
       const f = field as InputField
-      return `<Field data-invalid={!!form.formState.errors.${f.name}}>
-  <FieldLabel htmlFor="${f.name}" className="text-sm leading-none font-medium">
+      return `<Field data-invalid={!!form.formState.errors.${f.name}} data-disabled={${f.disabled}}>
+  <FieldLabel htmlFor="${f.name}">
     ${label}${requiredSpan}
   </FieldLabel>
   <Controller
@@ -124,8 +122,8 @@ function generateFieldJSX(field: FormField): string {
 
     case "textarea": {
       const f = field as TextareaField
-      return `<Field data-invalid={!!form.formState.errors.${f.name}}>
-  <FieldLabel htmlFor="${f.name}" className="text-sm leading-none font-medium">
+      return `<Field data-invalid={!!form.formState.errors.${f.name}} data-disabled={${f.disabled}}>
+  <FieldLabel htmlFor="${f.name}">
     ${label}${requiredSpan}
   </FieldLabel>
   <Controller
@@ -148,70 +146,62 @@ function generateFieldJSX(field: FormField): string {
 
     case "checkbox": {
       const descInner = description
-        ? `\n      <FieldDescription>${description}</FieldDescription>`
+        ? `\n    <FieldDescription>${description}</FieldDescription>`
         : ""
-      return `<Field data-invalid={!!form.formState.errors.${field.name}}>
-  <div className="flex items-start gap-3">
-    <Controller
-      name="${field.name}"
-      control={form.control}
-      render={({ field }) => (
-        <Checkbox
-          id="${field.name}"
-          checked={Boolean(field.value)}
-          onCheckedChange={field.onChange}
-          disabled={${field.disabled}}
-          aria-invalid={!!form.formState.errors.${field.name}}
-        />
-      )}
-    />
-    <div className="flex flex-col gap-1">
-      <FieldLabel htmlFor="${field.name}" className="text-sm leading-none font-medium">
-        ${label}${requiredSpan}
-      </FieldLabel>${descInner}
-    </div>
-  </div>
-  {form.formState.errors.${field.name} && (
+      return `<Field orientation="horizontal" data-invalid={!!form.formState.errors.${field.name}} data-disabled={${field.disabled}}>
+  <Controller
+    name="${field.name}"
+    control={form.control}
+    render={({ field }) => (
+      <Checkbox
+        id="${field.name}"
+        checked={Boolean(field.value)}
+        onCheckedChange={field.onChange}
+        disabled={${field.disabled}}
+        aria-invalid={!!form.formState.errors.${field.name}}
+      />
+    )}
+  />
+  <FieldContent>
+    <FieldLabel htmlFor="${field.name}">
+      ${label}${requiredSpan}
+    </FieldLabel>${descInner}
     <FieldError>{form.formState.errors.${field.name}?.message}</FieldError>
-  )}
+  </FieldContent>
 </Field>`
     }
 
     case "switch": {
       const descInner = description
-        ? `\n      <FieldDescription>${description}</FieldDescription>`
+        ? `\n    <FieldDescription>${description}</FieldDescription>`
         : ""
-      return `<Field data-invalid={!!form.formState.errors.${field.name}}>
-  <div className="flex items-center justify-between">
-    <div className="flex flex-col gap-0.5">
-      <FieldLabel htmlFor="${field.name}" className="text-sm font-medium">
-        ${label}${requiredSpan}
-      </FieldLabel>${descInner}
-    </div>
-    <Controller
-      name="${field.name}"
-      control={form.control}
-      render={({ field }) => (
-        <Switch
-          id="${field.name}"
-          checked={Boolean(field.value)}
-          onCheckedChange={field.onChange}
-          disabled={${field.disabled}}
-        />
-      )}
-    />
-  </div>
-  {form.formState.errors.${field.name} && (
+      return `<Field orientation="horizontal" data-invalid={!!form.formState.errors.${field.name}} data-disabled={${field.disabled}}>
+  <FieldContent>
+    <FieldLabel htmlFor="${field.name}">
+      ${label}${requiredSpan}
+    </FieldLabel>${descInner}
     <FieldError>{form.formState.errors.${field.name}?.message}</FieldError>
-  )}
+  </FieldContent>
+  <Controller
+    name="${field.name}"
+    control={form.control}
+    render={({ field }) => (
+      <Switch
+        id="${field.name}"
+        checked={Boolean(field.value)}
+        onCheckedChange={field.onChange}
+        disabled={${field.disabled}}
+      />
+    )}
+  />
 </Field>`
     }
 
     case "select": {
       const f = field as SelectField
       const constName = getOptionsConstName(f.name)
-      return `<Field data-invalid={!!form.formState.errors.${f.name}}>
-  <FieldLabel htmlFor="${f.name}" className="text-sm leading-none font-medium">
+      return `<Field data-invalid={!!form.formState.errors.${f.name}} data-disabled={${f.disabled}}>
+  <FieldLabel htmlFor="${f.name}">
     ${label}${requiredSpan}
   </FieldLabel>
   <Controller
@@ -236,10 +226,10 @@ function generateFieldJSX(field: FormField): string {
     case "radio-group": {
       const f = field as RadioGroupField
       const constName = getOptionsConstName(f.name)
-      return `<Field data-invalid={!!form.formState.errors.${f.name}}>
-  <FieldLabel className="text-sm leading-none font-medium">
+      return `<FieldSet>
+  <FieldLegend variant="label">
     ${label}${requiredSpan}
-  </FieldLabel>
+  </FieldLegend>${descEl}
   <Controller
     name="${f.name}"
     control={form.control}
@@ -248,27 +238,31 @@ function generateFieldJSX(field: FormField): string {
         {${constName}.map((o) => (
           <div key={o.value} className="flex items-center gap-2">
             <RadioGroupItem value={o.value} id={\`${f.name}-\${o.value}\`} />
-            <label htmlFor={\`${f.name}-\${o.value}\`} className="cursor-pointer text-sm font-medium">{o.label}</label>
+            <FieldLabel htmlFor={\`${f.name}-\${o.value}\`}>{o.label}</FieldLabel>
           </div>
         ))}
       </RadioGroup>
     )}
-  />${descEl}${errorEl}
-</Field>`
+  />
+  <FieldError>{form.formState.errors.${f.name}?.message}</FieldError>
+</FieldSet>`
     }
 
     case "checkbox-group": {
       const f = field as CheckboxGroupField
       const constName = getOptionsConstName(f.name)
-      return `<Field data-invalid={!!form.formState.errors.${f.name}}>
-  <FieldLabel className="text-sm leading-none font-medium">
+      const layoutClass = f.orientation === "horizontal"
+        ? "flex flex-row flex-wrap gap-3"
+        : "flex flex-col gap-3"
+      return `<FieldSet>
+  <FieldLegend variant="label">
     ${label}${requiredSpan}
-  </FieldLabel>
+  </FieldLegend>
   <Controller
     name="${f.name}"
     control={form.control}
     render={({ field }) => (
-      <Field orientation="${f.orientation}">
+      <div className="${layoutClass}">
         {${constName}.map((option) => (
           <div key={option.value} className="flex items-center gap-2">
             <Checkbox
@@ -284,15 +278,14 @@ function generateFieldJSX(field: FormField): string {
               }}
               disabled={${f.disabled}}
             />
-            <label htmlFor={\`${f.name}-\${option.value}\`} className="cursor-pointer text-sm font-medium">
-              {option.label}
-            </label>
+            <FieldLabel htmlFor={\`${f.name}-\${option.value}\`}>{option.label}</FieldLabel>
           </div>
         ))}
-      </Field>
+      </div>
     )}
-  />${descEl}${errorEl}
-</Field>`
+  />${descEl}
+  <FieldError>{form.formState.errors.${f.name}?.message}</FieldError>
+</FieldSet>`
     }
   }
 }
@@ -300,7 +293,17 @@ function generateFieldJSX(field: FormField): string {
 function getRequiredImports(fields: FormField[]): string {
   const types = new Set(fields.map((f) => f.type))
   const hasDescription = fields.some((f) => f.description)
-  const fieldComponents = ["Field", ...(hasDescription ? ["FieldDescription"] : []), "FieldError", "FieldLabel"].join(", ")
+  const hasHorizontal = types.has("checkbox") || types.has("switch")
+  const hasGrouped = types.has("radio-group") || types.has("checkbox-group")
+  const fieldComponents = [
+    "Field",
+    ...(hasHorizontal ? ["FieldContent"] : []),
+    ...(hasDescription ? ["FieldDescription"] : []),
+    "FieldError",
+    "FieldGroup",
+    "FieldLabel",
+    ...(hasGrouped ? ["FieldLegend", "FieldSet"] : []),
+  ].join(", ")
 
   const imports: string[] = [
     '"use client"',
@@ -364,7 +367,7 @@ export function generateFormCode(
     .join("\n")
 
   const fieldJSX = fields
-    .map((f) => indent(generateFieldJSX(f), 6))
+    .map((f) => indent(generateFieldJSX(f), 8))
     .join("\n\n")
 
   return `${getRequiredImports(fields)}
@@ -388,9 +391,10 @@ ${defaultValues}
   }
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={form.handleSubmit(onSubmit)}>
+      <FieldGroup className="mb-6">
 ${fieldJSX}
-
+      </FieldGroup>
       <Button type="submit" className="w-full" size="lg">${submitLabel}</Button>
     </form>
   )
