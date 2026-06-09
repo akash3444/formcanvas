@@ -2,6 +2,7 @@ import { create } from "zustand"
 import { persist, createJSONStorage } from "zustand/middleware"
 import { arrayMove } from "@dnd-kit/sortable"
 import type { FormField, FieldType, FieldOption } from "./types"
+import type { FormPreset } from "./presets"
 import { labelToKey, generateId } from "./utils"
 
 interface FormBuilderState {
@@ -23,6 +24,7 @@ interface FormBuilderActions {
   updateOption: (fieldId: string, optionId: string, updates: Partial<FieldOption>) => void
   removeOption: (fieldId: string, optionId: string) => void
   clearForm: () => void
+  loadPreset: (preset: FormPreset) => void
 }
 
 type FormBuilderStore = FormBuilderState & FormBuilderActions
@@ -183,6 +185,14 @@ export const useFormBuilderStore = create<FormBuilderStore>()(
         })),
 
       clearForm: () => set({ ...initialState, fields: [] }),
+
+      loadPreset: (preset) =>
+        set({
+          formName: preset.formName,
+          submitLabel: preset.submitLabel,
+          fields: preset.fields,
+          selectedFieldId: null,
+        }),
     }),
     {
       name: "shadcn-form-builder",

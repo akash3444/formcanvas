@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import {
   Empty,
   EmptyDescription,
@@ -9,6 +10,7 @@ import {
 } from "@/components/ui/empty"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useFormBuilderStore } from "@/lib/form-builder/store"
 import {
   closestCenter,
@@ -26,6 +28,8 @@ import {
 } from "@dnd-kit/sortable"
 import { LayoutTemplateIcon } from "lucide-react"
 import { FieldItem } from "./field-item"
+import { PresetsPanel } from "./presets-panel"
+import { Button } from "../ui/button"
 
 export function FieldEditor() {
   const {
@@ -37,6 +41,10 @@ export function FieldEditor() {
     setSubmitLabel,
     reorderFields,
   } = useFormBuilderStore()
+
+  const [activeTab, setActiveTab] = useState<string>(() =>
+    fields.length === 0 ? "presets" : "fields"
+  )
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -91,59 +99,92 @@ export function FieldEditor() {
         </div>
       </div>
 
-      {/* Field list */}
-      <div className="flex shrink-0 items-center justify-between border-b bg-background px-4 py-2">
-        <h2 className="text-sm font-semibold">
-          Fields{" "}
-          <span className="font-normal text-muted-foreground">
-            ({fields.length})
-          </span>
-        </h2>
-      </div>
-
-      {fields.length === 0 ? (
-        <Empty className="border-none">
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <LayoutTemplateIcon />
-            </EmptyMedia>
-            <EmptyTitle>No fields yet</EmptyTitle>
-            <EmptyDescription>
-              Click a field type on the left to add it
-            </EmptyDescription>
-          </EmptyHeader>
-        </Empty>
-      ) : (
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
+      {/* Tabs: Fields | Presets */}
+      <Tabs
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="flex min-h-0 flex-1 flex-col gap-0"
+      >
+        <TabsList
+          variant="line"
+          className="h-9 w-full shrink-0 justify-start gap-0 rounded-none px-1"
         >
-          <SortableContext
-            items={fields.map((f) => f.id)}
-            strategy={verticalListSortingStrategy}
-          >
-            <div className="min-h-0 flex-1 space-y-2 overflow-y-auto p-3 scroll-mask-y-from-90%">
-              {fields.map((field) => (
-                <FieldItem
-                  key={field.id}
-                  field={field}
-                  isSelected={selectedFieldId === field.id}
-                />
-              ))}
-            </div>
-          </SortableContext>
-        </DndContext>
-      )}
+          <TabsTrigger value="fields" className="px-3">
+            Fields
+            {fields.length > 0 && (
+              <span className="ml-1 text-muted-foreground">
+                ({fields.length})
+              </span>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="presets" className="px-3">
+            Presets
+          </TabsTrigger>
+        </TabsList>
 
-      {fields.length > 0 && (
-        <>
-          <Separator />
-          <p className="bg-background px-4 py-2 text-xs text-muted-foreground">
-            Drag fields to reorder · Click to edit
-          </p>
-        </>
-      )}
+        <TabsContent
+          value="fields"
+          className="mt-0 flex min-h-0 flex-col overflow-hidden"
+        >
+          {fields.length === 0 ? (
+            <Empty className="border-none">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <LayoutTemplateIcon />
+                </EmptyMedia>
+                <EmptyTitle>No fields yet</EmptyTitle>
+                <EmptyDescription>
+                  Click a field type on the left, or{" "}
+                  <Button
+                    onClick={() => setActiveTab("presets")}
+                    variant="link"
+                    className="h-6 px-0 underline"
+                  >
+                    start from a preset
+                  </Button>
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          ) : (
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={fields.map((f) => f.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                <div className="min-h-0 flex-1 space-y-2 overflow-y-auto p-3 scroll-mask-y-from-90%">
+                  {fields.map((field) => (
+                    <FieldItem
+                      key={field.id}
+                      field={field}
+                      isSelected={selectedFieldId === field.id}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
+          )}
+
+          {fields.length > 0 && (
+            <>
+              <Separator />
+              <p className="bg-background px-4 py-2 text-xs text-muted-foreground">
+                Drag fields to reorder · Click to edit
+              </p>
+            </>
+          )}
+        </TabsContent>
+
+        <TabsContent
+          value="presets"
+          className="mt-0 min-h-0 flex-1 overflow-y-auto"
+        >
+          <PresetsPanel onLoad={() => setActiveTab("fields")} />
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }
