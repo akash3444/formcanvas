@@ -67,7 +67,7 @@ export function PresetsPanel({ onLoad }: PresetsPanelProps) {
                 <p className="text-sm leading-tight font-semibold">
                   {preset.name}
                 </p>
-                <p className="mt-0.5 line-clamp-2 text-[11px] leading-snug text-muted-foreground">
+                <p className="mt-0.75 line-clamp-2 text-xs leading-snug text-muted-foreground">
                   {preset.description}
                 </p>
               </div>

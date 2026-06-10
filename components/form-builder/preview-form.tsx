@@ -48,6 +48,12 @@ function buildSchema(fields: FormField[]) {
   for (const field of fields) {
     switch (field.type) {
       case "input": {
+        if (field.inputType === "number") {
+          shape[field.name] = field.required
+            ? z.number({ required_error: "This field is required" })
+            : z.number().optional()
+          break
+        }
         let s = z.string()
         if (field.inputType === "email") s = s.email("Invalid email address")
         if (field.inputType === "url") s = s.url("Invalid URL")
@@ -88,6 +94,8 @@ function buildDefaultValues(fields: FormField[]): Record<string, unknown> {
   for (const field of fields) {
     switch (field.type) {
       case "input":
+        defaults[field.name] = field.inputType === "number" ? undefined : ""
+        break
       case "textarea":
       case "select":
       case "radio-group":
@@ -234,8 +242,17 @@ export function PreviewForm({
                           placeholder={field.placeholder}
                           disabled={field.disabled}
                           aria-invalid={fieldState.invalid}
-                          value={f.value as string}
-                          onChange={f.onChange}
+                          value={f.value ?? ""}
+                          onChange={
+                            field.inputType === "number"
+                              ? (e) =>
+                                  f.onChange(
+                                    e.target.value === ""
+                                      ? undefined
+                                      : e.target.valueAsNumber
+                                  )
+                              : f.onChange
+                          }
                           onBlur={f.onBlur}
                           name={f.name}
                           ref={f.ref}
@@ -404,9 +421,10 @@ export function PreviewForm({
                         <span className="ms-1 text-destructive">*</span>
                       )}
                     </FieldLegend>
-                    {field.description && field.descriptionPosition === "above-control" && (
-                      <FieldDescription>{field.description}</FieldDescription>
-                    )}
+                    {field.description &&
+                      field.descriptionPosition === "above-control" && (
+                        <FieldDescription>{field.description}</FieldDescription>
+                      )}
                     <Controller
                       name={field.name}
                       control={form.control}
@@ -441,9 +459,10 @@ export function PreviewForm({
                         </RadioGroup>
                       )}
                     />
-                    {field.description && field.descriptionPosition === "below-control" && (
-                      <FieldDescription>{field.description}</FieldDescription>
-                    )}
+                    {field.description &&
+                      field.descriptionPosition === "below-control" && (
+                        <FieldDescription>{field.description}</FieldDescription>
+                      )}
                     <FieldError>{error}</FieldError>
                   </FieldSet>
                 )
@@ -457,9 +476,10 @@ export function PreviewForm({
                         <span className="ms-1 text-destructive">*</span>
                       )}
                     </FieldLegend>
-                    {field.description && field.descriptionPosition === "above-control" && (
-                      <FieldDescription>{field.description}</FieldDescription>
-                    )}
+                    {field.description &&
+                      field.descriptionPosition === "above-control" && (
+                        <FieldDescription>{field.description}</FieldDescription>
+                      )}
                     <Controller
                       name={field.name}
                       control={form.control}
@@ -502,9 +522,10 @@ export function PreviewForm({
                         </div>
                       )}
                     />
-                    {field.description && field.descriptionPosition === "below-control" && (
-                      <FieldDescription>{field.description}</FieldDescription>
-                    )}
+                    {field.description &&
+                      field.descriptionPosition === "below-control" && (
+                        <FieldDescription>{field.description}</FieldDescription>
+                      )}
                     <FieldError>{error}</FieldError>
                   </FieldSet>
                 )
