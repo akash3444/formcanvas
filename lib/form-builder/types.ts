@@ -7,7 +7,7 @@ export type FieldType =
   | "radio-group"
   | "checkbox-group"
 
-export type InputType = "text" | "email" | "password" | "url" | "tel"
+export type InputType = "text" | "email" | "password" | "url" | "tel" | "number"
 
 export interface FieldOption {
   id: string

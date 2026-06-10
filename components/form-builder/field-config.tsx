@@ -207,7 +207,7 @@ export function FieldConfig({ field }: FieldConfigProps) {
               </SelectTrigger>
               <SelectContent>
                 {(
-                  ["text", "email", "password", "url", "tel"] as InputType[]
+                  ["text", "email", "password", "url", "tel", "number"] as InputType[]
                 ).map((t) => (
                   <SelectItem key={t} value={t}>
                     {t}

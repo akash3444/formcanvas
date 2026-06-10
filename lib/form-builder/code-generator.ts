@@ -12,6 +12,11 @@ function getZodType(field: FormField): string {
   switch (field.type) {
     case "input": {
       const f = field as InputField
+      if (f.inputType === "number") {
+        return f.required
+          ? 'z.number({ required_error: "This field is required" })'
+          : "z.number().optional()"
+      }
       let base = "z.string()"
       if (f.inputType === "email") base += '.email("Invalid email address")'
       if (f.inputType === "url") base += '.url("Invalid URL")'
@@ -44,6 +49,7 @@ function getZodType(field: FormField): string {
 function getDefaultValue(field: FormField): string {
   switch (field.type) {
     case "input":
+      return (field as InputField).inputType === "number" ? "undefined" : '""'
     case "textarea":
     case "select":
     case "radio-group":
@@ -100,6 +106,24 @@ function generateFieldJSX(field: FormField): string {
   switch (field.type) {
     case "input": {
       const f = field as InputField
+      const inputProps =
+        f.inputType === "number"
+          ? `id="${f.name}"
+        type="number"
+        placeholder="${f.placeholder}"
+        disabled={${f.disabled}}
+        aria-invalid={fieldState.invalid}
+        value={field.value ?? ""}
+        onChange={(e) => field.onChange(e.target.value === "" ? undefined : e.target.valueAsNumber)}
+        onBlur={field.onBlur}
+        name={field.name}
+        ref={field.ref}`
+          : `id="${f.name}"
+        type="${f.inputType}"
+        placeholder="${f.placeholder}"
+        disabled={${f.disabled}}
+        aria-invalid={fieldState.invalid}
+        {...field}`
       return `<Field data-invalid={!!form.formState.errors.${f.name}} data-disabled={${f.disabled}}>
   <FieldLabel htmlFor="${f.name}">
     ${label}${requiredSpan}
@@ -109,12 +133,7 @@ function generateFieldJSX(field: FormField): string {
     control={form.control}
     render={({ field, fieldState }) => (
       <Input
-        id="${f.name}"
-        type="${f.inputType}"
-        placeholder="${f.placeholder}"
-        disabled={${f.disabled}}
-        aria-invalid={fieldState.invalid}
-        {...field}
+        ${inputProps}
       />
     )}
   />${descEl("below-control")}${errorEl}
