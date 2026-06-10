@@ -201,12 +201,12 @@ export function FieldConfig({ field }: FieldConfigProps) {
   }
 
   return (
-    <div className="space-y-3 p-4">
-      <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
-        Field Settings
-      </p>
-
+    <div className="divide-y *:p-4">
       <div className="space-y-2.5">
+        <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+          Field Settings
+        </p>
+
         <LabeledRow label="Label" htmlFor={`label-${field.id}`}>
           <Input
             ref={labelInputRef}
@@ -278,8 +278,6 @@ export function FieldConfig({ field }: FieldConfigProps) {
         )}
       </div>
 
-      <Separator />
-
       <div className="space-y-2.5">
         <LabeledRow label="Description" htmlFor={`description-${field.id}`}>
           <Textarea
@@ -317,125 +315,120 @@ export function FieldConfig({ field }: FieldConfigProps) {
 
       {/* Default value — excluded for password subtype */}
       {!(field.type === "input" && field.inputType === "password") && (
-        <>
-          <Separator />
-          <div className="space-y-2.5">
-            <div className="flex items-center justify-between">
-              <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
-                Default Value
-              </p>
-              {field.defaultValue !== undefined && (
-                <button
-                  onClick={() =>
-                    updateField(field.id, { defaultValue: undefined })
-                  }
-                  className="text-muted-foreground transition-colors hover:text-destructive"
-                >
-                  <XIcon className="size-3.5" />
-                </button>
-              )}
-            </div>
-
-            {/* Text-like inputs */}
-            {(field.type === "textarea" ||
-              (field.type === "input" &&
-                ["text", "email", "url", "tel"].includes(field.inputType))) && (
-              <Input
-                value={(field.defaultValue as string | undefined) ?? ""}
-                onChange={(e) =>
-                  updateField(field.id, {
-                    defaultValue:
-                      e.target.value === "" ? undefined : e.target.value,
-                  })
+        <div className="space-y-2.5">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+              Default Value
+            </p>
+            {field.defaultValue !== undefined && (
+              <button
+                onClick={() =>
+                  updateField(field.id, { defaultValue: undefined })
                 }
-                placeholder="Enter default value"
-                type={
-                  field.type === "input" &&
-                  ["email", "url", "tel"].includes(field.inputType)
-                    ? field.inputType
-                    : "text"
-                }
-                className="h-7 text-xs"
-              />
-            )}
-
-            {/* Number input */}
-            {field.type === "input" && field.inputType === "number" && (
-              <Input
-                type="number"
-                value={(field.defaultValue as number | undefined) ?? ""}
-                onChange={(e) => {
-                  const raw = Number(e.target.value)
-                  updateField(field.id, {
-                    defaultValue:
-                      e.target.value === "" || isNaN(raw) ? undefined : raw,
-                  })
-                }}
-                placeholder="Enter default value"
-                className="h-7 text-xs"
-              />
-            )}
-
-            {/* Boolean toggle */}
-            {(field.type === "checkbox" || field.type === "switch") && (
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">
-                  {field.defaultValue === true ? "true" : "false"}
-                </span>
-                <Switch
-                  checked={field.defaultValue === true}
-                  onCheckedChange={(v) =>
-                    updateField(field.id, {
-                      defaultValue: v ? true : undefined,
-                    })
-                  }
-                  size="sm"
-                />
-              </div>
-            )}
-
-            {/* Select / RadioGroup: single option picker */}
-            {(field.type === "select" || field.type === "radio-group") && (
-              <Select
-                value={(field.defaultValue as string | undefined) ?? ""}
-                onValueChange={(v) =>
-                  updateField(field.id, {
-                    defaultValue: !v || v === "" ? undefined : v,
-                  })
-                }
-                disabled={field.options.length === 0}
+                className="text-muted-foreground transition-colors hover:text-destructive"
               >
-                <SelectTrigger className="h-7 w-full text-xs">
-                  <SelectValue placeholder="No default" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">— No default —</SelectItem>
-                  {field.options.map((opt) => (
-                    <SelectItem key={opt.id} value={opt.value}>
-                      {opt.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-
-            {/* CheckboxGroup: multi-select */}
-            {field.type === "checkbox-group" && (
-              <MultiSelectCombobox
-                options={field.options}
-                value={(field.defaultValue as string[] | undefined) ?? []}
-                onChange={(v) =>
-                  updateField(field.id, {
-                    defaultValue: v.length === 0 ? undefined : v,
-                  })
-                }
-              />
+                <XIcon className="size-3.5" />
+              </button>
             )}
           </div>
-        </>
-      )}
 
-      <Separator />
+          {/* Text-like inputs */}
+          {(field.type === "textarea" ||
+            (field.type === "input" &&
+              ["text", "email", "url", "tel"].includes(field.inputType))) && (
+            <Input
+              value={(field.defaultValue as string | undefined) ?? ""}
+              onChange={(e) =>
+                updateField(field.id, {
+                  defaultValue:
+                    e.target.value === "" ? undefined : e.target.value,
+                })
+              }
+              placeholder="Enter default value"
+              type={
+                field.type === "input" &&
+                ["email", "url", "tel"].includes(field.inputType)
+                  ? field.inputType
+                  : "text"
+              }
+              className="h-7 text-xs"
+            />
+          )}
+
+          {/* Number input */}
+          {field.type === "input" && field.inputType === "number" && (
+            <Input
+              type="number"
+              value={(field.defaultValue as number | undefined) ?? ""}
+              onChange={(e) => {
+                const raw = Number(e.target.value)
+                updateField(field.id, {
+                  defaultValue:
+                    e.target.value === "" || isNaN(raw) ? undefined : raw,
+                })
+              }}
+              placeholder="Enter default value"
+              className="h-7 text-xs"
+            />
+          )}
+
+          {/* Boolean toggle */}
+          {(field.type === "checkbox" || field.type === "switch") && (
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">
+                {field.defaultValue === true ? "true" : "false"}
+              </span>
+              <Switch
+                checked={field.defaultValue === true}
+                onCheckedChange={(v) =>
+                  updateField(field.id, {
+                    defaultValue: v ? true : undefined,
+                  })
+                }
+                size="sm"
+              />
+            </div>
+          )}
+
+          {/* Select / RadioGroup: single option picker */}
+          {(field.type === "select" || field.type === "radio-group") && (
+            <Select
+              value={(field.defaultValue as string | undefined) ?? ""}
+              onValueChange={(v) =>
+                updateField(field.id, {
+                  defaultValue: !v || v === "" ? undefined : v,
+                })
+              }
+              disabled={field.options.length === 0}
+            >
+              <SelectTrigger className="h-7 w-full text-xs">
+                <SelectValue placeholder="No default" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">— No default —</SelectItem>
+                {field.options.map((opt) => (
+                  <SelectItem key={opt.id} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+
+          {/* CheckboxGroup: multi-select */}
+          {field.type === "checkbox-group" && (
+            <MultiSelectCombobox
+              options={field.options}
+              value={(field.defaultValue as string[] | undefined) ?? []}
+              onChange={(v) =>
+                updateField(field.id, {
+                  defaultValue: v.length === 0 ? undefined : v,
+                })
+              }
+            />
+          )}
+        </div>
+      )}
 
       <div className="space-y-2.5">
         <SwitchRow
@@ -452,195 +445,183 @@ export function FieldConfig({ field }: FieldConfigProps) {
 
       {/* Textarea-specific: rows */}
       {field.type === "textarea" && (
-        <>
-          <Separator />
-          <LabeledRow label="Rows" htmlFor={`rows-${field.id}`}>
-            <Input
-              id={`rows-${field.id}`}
-              type="number"
-              min={1}
-              max={20}
-              value={field.rows}
-              onChange={(e) =>
-                updateField(field.id, {
-                  rows: Math.max(1, parseInt(e.target.value) || 1),
-                })
-              }
-            />
-          </LabeledRow>
-        </>
+        <LabeledRow label="Rows" htmlFor={`rows-${field.id}`}>
+          <Input
+            id={`rows-${field.id}`}
+            type="number"
+            min={1}
+            max={20}
+            value={field.rows}
+            onChange={(e) =>
+              updateField(field.id, {
+                rows: Math.max(1, parseInt(e.target.value) || 1),
+              })
+            }
+          />
+        </LabeledRow>
       )}
 
       {/* RadioGroup / CheckboxGroup: orientation selector */}
       {(field.type === "radio-group" || field.type === "checkbox-group") && (
-        <>
-          <Separator />
-          <LabeledRow label="Orientation">
-            <Select
-              value={field.orientation}
-              onValueChange={(v) =>
-                updateField(field.id, {
-                  orientation: v as GroupOrientation,
-                })
-              }
-              items={ORIENTATION_OPTIONS}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {ORIENTATION_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </LabeledRow>
-        </>
+        <LabeledRow label="Orientation">
+          <Select
+            value={field.orientation}
+            onValueChange={(v) =>
+              updateField(field.id, {
+                orientation: v as GroupOrientation,
+              })
+            }
+            items={ORIENTATION_OPTIONS}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {ORIENTATION_OPTIONS.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </LabeledRow>
       )}
 
       {/* Validation */}
       {hasValidation && (
-        <>
-          <Separator />
-          <div className="space-y-2.5">
-            <button
-              className="flex w-full items-center justify-between"
-              onClick={() => setValidationOpen((v) => !v)}
-            >
-              <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
-                Validation
-              </p>
-              <ChevronDownIcon
-                className={cn(
-                  "size-3.5 text-muted-foreground transition-transform",
-                  validationOpen && "rotate-180"
-                )}
-              />
-            </button>
+        <div className="space-y-2.5">
+          <button
+            className="flex w-full items-center justify-between"
+            onClick={() => setValidationOpen((v) => !v)}
+          >
+            <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+              Validation
+            </p>
+            <ChevronDownIcon
+              className={cn(
+                "size-3.5 text-muted-foreground transition-transform",
+                validationOpen && "rotate-180"
+              )}
+            />
+          </button>
 
-            {validationOpen && (
-              <div className="space-y-1">
-                <div className="flex gap-2">
-                  <div className="flex flex-1 flex-col gap-1">
-                    <label className="text-[11px] text-muted-foreground">
-                      Min {showNumberValidation ? "value" : "length"}
-                    </label>
-                    <Input
-                      type="number"
-                      min={showNumberValidation ? undefined : 1}
-                      value={
-                        showNumberValidation
-                          ? (numVal.min ?? "")
-                          : (strVal.minLength ?? "")
-                      }
-                      placeholder="–"
-                      onChange={(e) => {
-                        const raw = Number(e.target.value)
-                        const v =
-                          e.target.value === "" || isNaN(raw) ? undefined : raw
-                        showNumberValidation
-                          ? patchNumVal({ min: v })
-                          : patchStrVal({ minLength: v })
-                      }}
-                      className="h-7 text-xs"
-                    />
-                  </div>
-                  <div className="flex flex-1 flex-col gap-1">
-                    <label className="text-[11px] text-muted-foreground">
-                      Max {showNumberValidation ? "value" : "length"}
-                    </label>
-                    <Input
-                      type="number"
-                      min={showNumberValidation ? undefined : 1}
-                      value={
-                        showNumberValidation
-                          ? (numVal.max ?? "")
-                          : (strVal.maxLength ?? "")
-                      }
-                      placeholder="–"
-                      onChange={(e) => {
-                        const raw = Number(e.target.value)
-                        const v =
-                          e.target.value === "" || isNaN(raw) ? undefined : raw
-                        showNumberValidation
-                          ? patchNumVal({ max: v })
-                          : patchStrVal({ maxLength: v })
-                      }}
-                      className="h-7 text-xs"
-                    />
-                  </div>
+          {validationOpen && (
+            <div className="space-y-1">
+              <div className="flex gap-2">
+                <div className="flex flex-1 flex-col gap-1">
+                  <label className="text-[11px] text-muted-foreground">
+                    Min {showNumberValidation ? "value" : "length"}
+                  </label>
+                  <Input
+                    type="number"
+                    min={showNumberValidation ? undefined : 1}
+                    value={
+                      showNumberValidation
+                        ? (numVal.min ?? "")
+                        : (strVal.minLength ?? "")
+                    }
+                    placeholder="–"
+                    onChange={(e) => {
+                      const raw = Number(e.target.value)
+                      const v =
+                        e.target.value === "" || isNaN(raw) ? undefined : raw
+                      showNumberValidation
+                        ? patchNumVal({ min: v })
+                        : patchStrVal({ minLength: v })
+                    }}
+                    className="h-7 text-xs"
+                  />
                 </div>
-                {(numError || strError) && (
-                  <p className="text-xs text-destructive">
-                    {numError || strError}
-                  </p>
-                )}
+                <div className="flex flex-1 flex-col gap-1">
+                  <label className="text-[11px] text-muted-foreground">
+                    Max {showNumberValidation ? "value" : "length"}
+                  </label>
+                  <Input
+                    type="number"
+                    min={showNumberValidation ? undefined : 1}
+                    value={
+                      showNumberValidation
+                        ? (numVal.max ?? "")
+                        : (strVal.maxLength ?? "")
+                    }
+                    placeholder="–"
+                    onChange={(e) => {
+                      const raw = Number(e.target.value)
+                      const v =
+                        e.target.value === "" || isNaN(raw) ? undefined : raw
+                      showNumberValidation
+                        ? patchNumVal({ max: v })
+                        : patchStrVal({ maxLength: v })
+                    }}
+                    className="h-7 text-xs"
+                  />
+                </div>
               </div>
-            )}
-          </div>
-        </>
+              {(numError || strError) && (
+                <p className="text-xs text-destructive">
+                  {numError || strError}
+                </p>
+              )}
+            </div>
+          )}
+        </div>
       )}
 
       {/* Select / RadioGroup / CheckboxGroup: options editor */}
       {(field.type === "select" ||
         field.type === "radio-group" ||
         field.type === "checkbox-group") && (
-        <>
-          <Separator />
-          <div className="space-y-2">
-            <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
-              Options
-            </p>
-            <div className="space-y-1.5">
-              {field.options.map((option) => (
-                <div key={option.id} className="flex items-center gap-1.5">
-                  <Input
-                    value={option.label}
-                    onChange={(e) =>
-                      updateOption(field.id, option.id, {
-                        label: e.target.value,
-                        value: e.target.value
-                          .toLowerCase()
-                          .replace(/\s+/g, "-")
-                          .replace(/[^a-z0-9-]/g, ""),
-                      })
-                    }
-                    placeholder="Option label"
-                    className="h-7 text-xs"
-                  />
-                  <Input
-                    value={option.value}
-                    onChange={(e) =>
-                      updateOption(field.id, option.id, {
-                        value: e.target.value,
-                      })
-                    }
-                    placeholder="value"
-                    className="h-7 w-24 shrink-0 font-mono text-xs"
-                  />
-                  <button
-                    onClick={() => removeOption(field.id, option.id)}
-                    disabled={field.options.length <= 1}
-                    className="shrink-0 text-muted-foreground transition-colors hover:text-destructive disabled:opacity-30"
-                  >
-                    <Trash2Icon className="size-3.5" />
-                  </button>
-                </div>
-              ))}
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 w-full text-xs"
-              onClick={() => addOption(field.id)}
-            >
-              <PlusIcon className="mr-1 size-3.5" />
-              Add option
-            </Button>
+        <div className="space-y-2">
+          <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+            Options
+          </p>
+          <div className="space-y-1.5">
+            {field.options.map((option) => (
+              <div key={option.id} className="flex items-center gap-1.5">
+                <Input
+                  value={option.label}
+                  onChange={(e) =>
+                    updateOption(field.id, option.id, {
+                      label: e.target.value,
+                      value: e.target.value
+                        .toLowerCase()
+                        .replace(/\s+/g, "-")
+                        .replace(/[^a-z0-9-]/g, ""),
+                    })
+                  }
+                  placeholder="Option label"
+                  className="h-7 text-xs"
+                />
+                <Input
+                  value={option.value}
+                  onChange={(e) =>
+                    updateOption(field.id, option.id, {
+                      value: e.target.value,
+                    })
+                  }
+                  placeholder="value"
+                  className="h-7 w-24 shrink-0 font-mono text-xs"
+                />
+                <button
+                  onClick={() => removeOption(field.id, option.id)}
+                  disabled={field.options.length <= 1}
+                  className="shrink-0 text-muted-foreground transition-colors hover:text-destructive disabled:opacity-30"
+                >
+                  <Trash2Icon className="size-3.5" />
+                </button>
+              </div>
+            ))}
           </div>
-        </>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 w-full text-xs"
+            onClick={() => addOption(field.id)}
+          >
+            <PlusIcon className="mr-1 size-3.5" />
+            Add option
+          </Button>
+        </div>
       )}
     </div>
   )
