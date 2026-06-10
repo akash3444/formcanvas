@@ -71,7 +71,7 @@ export function FieldItem({ field, isSelected }: FieldItemProps) {
       className={cn(
         "rounded-lg border bg-background transition-shadow",
         isDragging && "opacity-50 shadow-lg",
-        isSelected && "border-ring ring-2 ring-ring/20"
+        isSelected && "border-ring/70"
       )}
     >
       {/* Row header */}
