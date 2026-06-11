@@ -8,6 +8,7 @@ import {
   ChevronsUpDown,
   CircleDot,
   ListChecks,
+  SlidersHorizontal,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import type { FieldType } from "@/lib/form-builder/types"
@@ -70,6 +71,12 @@ const PALETTE_ITEMS: PaletteItem[] = [
     label: "Radio Group",
     description: "Single choice from a list",
     icon: CircleDot,
+  },
+  {
+    type: "slider",
+    label: "Slider",
+    description: "Numeric range selector",
+    icon: SlidersHorizontal,
   },
 ]
 

@@ -5,6 +5,7 @@ import type {
   SelectField,
   RadioGroupField,
   CheckboxGroupField,
+  SliderField,
   NumberValidation,
   StringValidation,
 } from "./types"
@@ -58,6 +59,10 @@ function getZodType(field: FormField): string {
       return field.required
         ? 'z.array(z.string()).min(1, "Select at least one option")'
         : "z.array(z.string())"
+    case "slider": {
+      const f = field as SliderField
+      return `z.number().min(${f.min}).max(${f.max})`
+    }
   }
 }
 
@@ -80,6 +85,10 @@ function getDefaultValue(field: FormField): string {
       return "false"
     case "checkbox-group":
       return "[]"
+    case "slider": {
+      const f = field as SliderField
+      return String(f.min + (f.max - f.min) / 2)
+    }
   }
 }
 
@@ -331,6 +340,32 @@ function generateFieldJSX(field: FormField): string {
   <FieldError>{form.formState.errors.${f.name}?.message}</FieldError>
 </FieldSet>`
     }
+
+    case "slider": {
+      const f = field as SliderField
+      return `<Field data-invalid={!!form.formState.errors.${f.name}} data-disabled={${f.disabled}}>
+  <Controller
+    name="${f.name}"
+    control={form.control}
+    render={({ field }) => (
+      <>
+        <div className="flex items-center justify-between">
+          <FieldLabel>${label}</FieldLabel>
+          <span className="text-sm font-medium tabular-nums">{field.value}</span>
+        </div>${descEl("above-control")}
+        <Slider
+          value={field.value}
+          onValueChange={field.onChange}
+          min={${f.min}}
+          max={${f.max}}
+          step={${f.step}}
+          disabled={${f.disabled}}
+        />
+      </>
+    )}
+  />${descEl("below-control")}${errorEl}
+</Field>`
+    }
   }
 }
 
@@ -376,6 +411,8 @@ function getRequiredImports(fields: FormField[]): string {
     imports.push(
       'import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"'
     )
+  if (types.has("slider"))
+    imports.push('import { Slider } from "@/components/ui/slider"')
 
   return imports.join("\n")
 }

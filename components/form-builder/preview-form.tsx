@@ -20,7 +20,9 @@ import type {
   FormField,
   NumberValidation,
   StringValidation,
+  SliderField,
 } from "@/lib/form-builder/types"
+import { Slider } from "@/components/ui/slider"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -104,6 +106,11 @@ function buildSchema(fields: FormField[]) {
           ? z.array(z.string()).min(1, "Select at least one option")
           : z.array(z.string()).default([])
         break
+      case "slider": {
+        const f = field as SliderField
+        shape[field.name] = z.number().min(f.min).max(f.max)
+        break
+      }
     }
   }
   return z.object(shape)
@@ -132,6 +139,11 @@ function buildDefaultValues(fields: FormField[]): Record<string, unknown> {
       case "checkbox-group":
         defaults[field.name] = []
         break
+      case "slider": {
+        const f = field as SliderField
+        defaults[field.name] = f.min + (f.max - f.min) / 2
+        break
+      }
     }
   }
   return defaults
@@ -555,6 +567,51 @@ export function PreviewForm({
                       )}
                     <FieldError>{error}</FieldError>
                   </FieldSet>
+                )
+
+              case "slider":
+                return (
+                  <Field
+                    key={field.id}
+                    data-invalid={!!error}
+                    data-disabled={field.disabled}
+                  >
+                    <Controller
+                      name={field.name}
+                      control={form.control}
+                      render={({ field: f }) => (
+                        <>
+                          <div className="flex items-center justify-between">
+                            <FieldLabel>{field.label}</FieldLabel>
+                            <span className="text-sm font-medium tabular-nums">
+                              {f.value as number}
+                            </span>
+                          </div>
+                          {field.description &&
+                            field.descriptionPosition === "above-control" && (
+                              <FieldDescription>
+                                {field.description}
+                              </FieldDescription>
+                            )}
+                          <Slider
+                            value={(f.value as number) ?? field.min}
+                            onValueChange={f.onChange}
+                            min={field.min}
+                            max={field.max}
+                            step={field.step}
+                            disabled={field.disabled}
+                          />
+                          {field.description &&
+                            field.descriptionPosition === "below-control" && (
+                              <FieldDescription>
+                                {field.description}
+                              </FieldDescription>
+                            )}
+                        </>
+                      )}
+                    />
+                    <FieldError>{error}</FieldError>
+                  </Field>
                 )
             }
           })}

@@ -37,6 +37,7 @@ const defaultFieldNames: Record<FieldType, string> = {
   select: "Select",
   "radio-group": "Radio Group",
   "checkbox-group": "Checkbox Group",
+  slider: "Slider",
 }
 
 function createDefaultField(type: FieldType): FormField {
@@ -72,6 +73,8 @@ function createDefaultField(type: FieldType): FormField {
       return { ...base, type: "radio-group", options: defaultOptions, orientation: "vertical" }
     case "checkbox-group":
       return { ...base, type: "checkbox-group", options: defaultOptions, orientation: "vertical" }
+    case "slider":
+      return { ...base, type: "slider", min: 0, max: 100, step: 1, defaultValue: 50 }
   }
 }
 
