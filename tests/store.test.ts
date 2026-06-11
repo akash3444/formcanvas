@@ -345,6 +345,98 @@ describe('removeOption', () => {
   })
 })
 
+describe('addField — slider and checkbox-group defaults', () => {
+  it('creates a slider with min/max/step and a midpoint default value', () => {
+    useFormBuilderStore.getState().addField('slider')
+    const field = useFormBuilderStore.getState().fields[0]
+    expect(field.type).toBe('slider')
+    if (field.type === 'slider') {
+      expect(field.min).toBe(0)
+      expect(field.max).toBe(100)
+      expect(field.step).toBe(1)
+      expect(field.defaultValue).toBe(50)
+    }
+  })
+
+  it('creates a checkbox-group with two default options', () => {
+    useFormBuilderStore.getState().addField('checkbox-group')
+    const field = useFormBuilderStore.getState().fields[0]
+    if (field.type === 'checkbox-group') {
+      expect(field.options).toHaveLength(2)
+    }
+  })
+})
+
+// A defaultValue that references an option value must not survive that option
+// being renamed or deleted — otherwise the form initialises to a value with no
+// matching control.
+describe('option changes cascade to defaultValue', () => {
+  const s = () => useFormBuilderStore.getState()
+
+  it('clears a select default when its referenced option value changes', () => {
+    s().addField('select')
+    const f = s().fields[0]
+    if (f.type !== 'select') return
+    s().updateField(f.id, { defaultValue: 'option-1' })
+    s().updateOption(f.id, f.options[0].id, { value: 'changed' })
+    expect(s().fields[0].defaultValue).toBeUndefined()
+  })
+
+  it('preserves a select default when an unrelated option value changes', () => {
+    s().addField('select')
+    const f = s().fields[0]
+    if (f.type !== 'select') return
+    s().updateField(f.id, { defaultValue: 'option-1' })
+    s().updateOption(f.id, f.options[1].id, { value: 'changed' })
+    expect(s().fields[0].defaultValue).toBe('option-1')
+  })
+
+  it('filters a checkbox-group default array when an option value changes', () => {
+    s().addField('checkbox-group')
+    const f = s().fields[0]
+    if (f.type !== 'checkbox-group') return
+    s().updateField(f.id, { defaultValue: ['option-1', 'option-2'] })
+    s().updateOption(f.id, f.options[0].id, { value: 'changed' })
+    expect(s().fields[0].defaultValue).toEqual(['option-2'])
+  })
+
+  it('clears a checkbox-group default to undefined when filtering empties it', () => {
+    s().addField('checkbox-group')
+    const f = s().fields[0]
+    if (f.type !== 'checkbox-group') return
+    s().updateField(f.id, { defaultValue: ['option-1'] })
+    s().updateOption(f.id, f.options[0].id, { value: 'changed' })
+    expect(s().fields[0].defaultValue).toBeUndefined()
+  })
+
+  it('clears a radio default when its referenced option is removed', () => {
+    s().addField('radio-group')
+    const f = s().fields[0]
+    if (f.type !== 'radio-group') return
+    s().updateField(f.id, { defaultValue: 'option-1' })
+    s().removeOption(f.id, f.options[0].id)
+    expect(s().fields[0].defaultValue).toBeUndefined()
+  })
+
+  it('preserves a radio default when an unrelated option is removed', () => {
+    s().addField('radio-group')
+    const f = s().fields[0]
+    if (f.type !== 'radio-group') return
+    s().updateField(f.id, { defaultValue: 'option-2' })
+    s().removeOption(f.id, f.options[0].id)
+    expect(s().fields[0].defaultValue).toBe('option-2')
+  })
+
+  it('filters a checkbox-group default array when an option is removed', () => {
+    s().addField('checkbox-group')
+    const f = s().fields[0]
+    if (f.type !== 'checkbox-group') return
+    s().updateField(f.id, { defaultValue: ['option-1', 'option-2'] })
+    s().removeOption(f.id, f.options[0].id)
+    expect(s().fields[0].defaultValue).toEqual(['option-2'])
+  })
+})
+
 describe('clearForm', () => {
   it('resets fields to an empty array', () => {
     useFormBuilderStore.getState().addField('input')
