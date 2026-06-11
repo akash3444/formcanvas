@@ -1,7 +1,13 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { PlusIcon, Trash2Icon, ChevronDownIcon, XIcon } from "lucide-react"
+import {
+  PlusIcon,
+  Trash2Icon,
+  ChevronDownIcon,
+  XIcon,
+  AlertCircleIcon,
+} from "lucide-react"
 import {
   Combobox,
   ComboboxContent,
@@ -230,7 +236,8 @@ export function FieldConfig({ field }: FieldConfigProps) {
 
         {field.type !== "checkbox" &&
           field.type !== "switch" &&
-          field.type !== "checkbox-group" && (
+          field.type !== "checkbox-group" &&
+          field.type !== "slider" && (
             <LabeledRow label="Placeholder" htmlFor={`placeholder-${field.id}`}>
               <Input
                 id={`placeholder-${field.id}`}
@@ -427,15 +434,57 @@ export function FieldConfig({ field }: FieldConfigProps) {
               }
             />
           )}
+
+          {/* Slider: number input */}
+          {field.type === "slider" &&
+            (() => {
+              const dv = (field.defaultValue as number | undefined) ?? 50
+              const outOfRange = dv < field.min || dv > field.max
+              const offStep =
+                !outOfRange &&
+                Math.abs((dv - field.min) % field.step) > 1e-9 &&
+                Math.abs(((dv - field.min) % field.step) - field.step) > 1e-9
+              const warning = outOfRange
+                ? `Value ${dv} is outside range [${field.min}, ${field.max}]`
+                : offStep
+                  ? `Value ${dv} is not a multiple of step ${field.step} from min ${field.min}`
+                  : null
+              return (
+                <>
+                  <Input
+                    type="number"
+                    min={field.min}
+                    max={field.max}
+                    step={field.step}
+                    value={dv}
+                    onChange={(e) => {
+                      const raw = Number(e.target.value)
+                      updateField(field.id, {
+                        defaultValue: isNaN(raw) ? undefined : raw,
+                      })
+                    }}
+                    className="h-7 text-xs"
+                  />
+                  {warning && (
+                    <p className="flex items-start gap-1.5 text-xs text-warning">
+                      <AlertCircleIcon className="mt-0.5 size-3 shrink-0 fill-warning/10" />
+                      {warning}
+                    </p>
+                  )}
+                </>
+              )
+            })()}
         </div>
       )}
 
       <div className="space-y-2.5">
-        <SwitchRow
-          label="Required"
-          checked={field.required}
-          onChange={(v) => updateField(field.id, { required: v })}
-        />
+        {field.type !== "slider" && (
+          <SwitchRow
+            label="Required"
+            checked={field.required}
+            onChange={(v) => updateField(field.id, { required: v })}
+          />
+        )}
         <SwitchRow
           label="Disabled"
           checked={field.disabled}
@@ -485,6 +534,60 @@ export function FieldConfig({ field }: FieldConfigProps) {
             </SelectContent>
           </Select>
         </LabeledRow>
+      )}
+
+      {/* Slider: min / max / step */}
+      {field.type === "slider" && (
+        <div className="space-y-2.5">
+          <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+            Range
+          </p>
+          <div className="flex gap-2">
+            <div className="flex flex-1 flex-col gap-1">
+              <label className="text-[11px] text-muted-foreground">Min</label>
+              <Input
+                type="number"
+                value={field.min}
+                onChange={(e) => {
+                  const v = Number(e.target.value)
+                  updateField(field.id, {
+                    min: isNaN(v) ? 0 : v,
+                  } as Partial<FormField>)
+                }}
+                className="h-7 text-xs"
+              />
+            </div>
+            <div className="flex flex-1 flex-col gap-1">
+              <label className="text-[11px] text-muted-foreground">Max</label>
+              <Input
+                type="number"
+                value={field.max}
+                onChange={(e) => {
+                  const v = Number(e.target.value)
+                  updateField(field.id, {
+                    max: isNaN(v) ? 100 : v,
+                  } as Partial<FormField>)
+                }}
+                className="h-7 text-xs"
+              />
+            </div>
+            <div className="flex flex-1 flex-col gap-1">
+              <label className="text-[11px] text-muted-foreground">Step</label>
+              <Input
+                type="number"
+                value={field.step}
+                min={0.001}
+                onChange={(e) => {
+                  const v = Number(e.target.value)
+                  updateField(field.id, {
+                    step: isNaN(v) || v <= 0 ? 1 : v,
+                  } as Partial<FormField>)
+                }}
+                className="h-7 text-xs"
+              />
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Validation */}

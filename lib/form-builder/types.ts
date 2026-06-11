@@ -6,6 +6,7 @@ export type FieldType =
   | "select"
   | "radio-group"
   | "checkbox-group"
+  | "slider"
 
 export type InputType = "text" | "email" | "password" | "url" | "tel" | "number"
 
@@ -78,6 +79,13 @@ export interface CheckboxGroupField extends BaseField {
   orientation: GroupOrientation
 }
 
+export interface SliderField extends BaseField {
+  type: "slider"
+  min: number
+  max: number
+  step: number
+}
+
 export type FormField =
   | InputField
   | TextareaField
@@ -86,3 +94,4 @@ export type FormField =
   | SelectField
   | RadioGroupField
   | CheckboxGroupField
+  | SliderField
