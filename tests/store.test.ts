@@ -179,6 +179,29 @@ describe('updateField', () => {
     useFormBuilderStore.getState().updateField(id, { name: 'customName' })
     expect(useFormBuilderStore.getState().fields[0].name).toBe('customName')
   })
+
+  // Names become object keys in the generated schema and the RHF registry.
+  // Renaming one field onto another's name must not create a silent collision —
+  // the store auto-disambiguates instead.
+  it('disambiguates a name that collides with another field', () => {
+    useFormBuilderStore.getState().addField('input') // textField
+    useFormBuilderStore.getState().addField('input') // textField2
+    const [a, b] = useFormBuilderStore.getState().fields
+    useFormBuilderStore.getState().updateField(b.id, { name: 'textField' })
+    expect(useFormBuilderStore.getState().fields[1].name).toBe('textField2')
+    // The first field keeps its name.
+    expect(useFormBuilderStore.getState().fields[0].name).toBe(a.name)
+  })
+
+  it('lets a field keep its own name when other updates are applied', () => {
+    useFormBuilderStore.getState().addField('input')
+    const id = useFormBuilderStore.getState().fields[0].id
+    const original = useFormBuilderStore.getState().fields[0].name
+    // Re-setting the same name (e.g. label edit that yields the same key) must
+    // not bump the suffix by colliding with itself.
+    useFormBuilderStore.getState().updateField(id, { name: original })
+    expect(useFormBuilderStore.getState().fields[0].name).toBe(original)
+  })
 })
 
 describe('reorderFields', () => {

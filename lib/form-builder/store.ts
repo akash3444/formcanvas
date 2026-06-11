@@ -3,7 +3,7 @@ import { persist, createJSONStorage } from "zustand/middleware"
 import { arrayMove } from "@dnd-kit/sortable"
 import type { FormField, FieldType, FieldOption } from "./types"
 import type { FormPreset } from "./presets"
-import { labelToKey, generateId } from "./utils"
+import { labelToKey, generateId, uniqueName } from "./utils"
 
 interface FormBuilderState {
   formName: string
@@ -97,11 +97,7 @@ export const useFormBuilderStore = create<FormBuilderStore>()(
         set((state) => {
           const field = createDefaultField(type)
           const existingNames = new Set(state.fields.map((f) => f.name))
-          if (existingNames.has(field.name)) {
-            let counter = 2
-            while (existingNames.has(`${field.name}${counter}`)) counter++
-            field.name = `${field.name}${counter}`
-          }
+          field.name = uniqueName(field.name, existingNames)
           return {
             fields: [...state.fields, field],
             selectedFieldId: field.id,
@@ -116,11 +112,24 @@ export const useFormBuilderStore = create<FormBuilderStore>()(
         })),
 
       updateField: (id, updates) =>
-        set((state) => ({
-          fields: state.fields.map((f) =>
-            f.id === id ? ({ ...f, ...updates } as FormField) : f
-          ),
-        })),
+        set((state) => {
+          // Field names become object keys in the generated schema and the RHF
+          // registry, so they must stay unique. When a name is being set
+          // (e.g. auto-derived from a label edit), disambiguate against the
+          // OTHER fields' names.
+          let nextUpdates = updates
+          if (typeof updates.name === "string") {
+            const otherNames = new Set(
+              state.fields.filter((f) => f.id !== id).map((f) => f.name)
+            )
+            nextUpdates = { ...updates, name: uniqueName(updates.name, otherNames) }
+          }
+          return {
+            fields: state.fields.map((f) =>
+              f.id === id ? ({ ...f, ...nextUpdates } as FormField) : f
+            ),
+          }
+        }),
 
       reorderFields: (activeId, overId) =>
         set((state) => {
