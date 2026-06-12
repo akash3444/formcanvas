@@ -1,5 +1,20 @@
 import { describe, it, expect } from 'vitest'
-import { labelToKey, toPascalCase } from '../lib/form-builder/utils'
+import { labelToKey, toPascalCase, uniqueName } from '../lib/form-builder/utils'
+
+describe('uniqueName', () => {
+  it('returns the desired name when it is free', () => {
+    expect(uniqueName('email', new Set())).toBe('email')
+    expect(uniqueName('email', new Set(['name', 'phone']))).toBe('email')
+  })
+
+  it('appends 2 on the first collision', () => {
+    expect(uniqueName('email', new Set(['email']))).toBe('email2')
+  })
+
+  it('skips past already-taken suffixes', () => {
+    expect(uniqueName('email', new Set(['email', 'email2', 'email3']))).toBe('email4')
+  })
+})
 
 describe('labelToKey', () => {
   it('lowercases a single word', () => {
