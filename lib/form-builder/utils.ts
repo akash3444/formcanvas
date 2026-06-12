@@ -35,3 +35,17 @@ export function toPascalCase(label: string): string {
 export function generateId(): string {
   return crypto.randomUUID()
 }
+
+/**
+ * Returns `desired` if it is not already in `existing`, otherwise appends the
+ * smallest integer suffix (starting at 2) that makes it unique — e.g.
+ * "email" -> "email2" -> "email3". Field names must be unique because they
+ * become object keys in the generated Zod schema and the react-hook-form field
+ * registry; a collision silently merges two fields into one.
+ */
+export function uniqueName(desired: string, existing: Set<string>): string {
+  if (!existing.has(desired)) return desired
+  let n = 2
+  while (existing.has(`${desired}${n}`)) n++
+  return `${desired}${n}`
+}
