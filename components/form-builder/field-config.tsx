@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useRef, useState } from "react"
 import {
   PlusIcon,
   Trash2Icon,
@@ -142,15 +142,11 @@ export function FieldConfig({ field }: FieldConfigProps) {
   const updateOption = useFormBuilderStore((s) => s.updateOption)
   const removeOption = useFormBuilderStore((s) => s.removeOption)
 
-  const labelInputRef = useRef<HTMLInputElement>(null)
+  // FieldConfig mounts fresh for each selected field (the parent renders it
+  // behind `key={field.id}` and only while selected), so these initialize
+  // correctly per field without an effect to reset them.
   const nameManuallyEdited = useRef(false)
   const [validationOpen, setValidationOpen] = useState(false)
-
-  useEffect(() => {
-    nameManuallyEdited.current = false
-    setValidationOpen(false)
-    labelInputRef.current?.focus()
-  }, [field.id])
 
   const showNumberValidation =
     field.type === "input" && field.inputType === "number"
@@ -218,7 +214,7 @@ export function FieldConfig({ field }: FieldConfigProps) {
 
         <LabeledRow label="Label" htmlFor={`label-${field.id}`}>
           <Input
-            ref={labelInputRef}
+            autoFocus
             id={`label-${field.id}`}
             value={field.label}
             onChange={(e) => handleLabelChange(e.target.value)}

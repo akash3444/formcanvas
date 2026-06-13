@@ -143,7 +143,7 @@ export function FieldItem({ field, isSelected }: FieldItemProps) {
       {/* Inline config panel */}
       {isSelected && (
         <div className="border-t">
-          <FieldConfig field={field} />
+          <FieldConfig key={field.id} field={field} />
         </div>
       )}
     </div>
