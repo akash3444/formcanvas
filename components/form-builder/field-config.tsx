@@ -608,8 +608,14 @@ export function FieldConfig({ field }: FieldConfigProps) {
           </p>
           <div className="flex gap-2">
             <div className="flex flex-1 flex-col gap-1">
-              <label className="text-[11px] text-muted-foreground">Min</label>
+              <label
+                htmlFor={`min-${field.id}`}
+                className="text-[11px] text-muted-foreground"
+              >
+                Min
+              </label>
               <Input
+                id={`min-${field.id}`}
                 type="number"
                 value={field.min}
                 onChange={(e) => {
@@ -622,8 +628,14 @@ export function FieldConfig({ field }: FieldConfigProps) {
               />
             </div>
             <div className="flex flex-1 flex-col gap-1">
-              <label className="text-[11px] text-muted-foreground">Max</label>
+              <label
+                htmlFor={`max-${field.id}`}
+                className="text-[11px] text-muted-foreground"
+              >
+                Max
+              </label>
               <Input
+                id={`max-${field.id}`}
                 type="number"
                 value={field.max}
                 onChange={(e) => {
@@ -636,8 +648,14 @@ export function FieldConfig({ field }: FieldConfigProps) {
               />
             </div>
             <div className="flex flex-1 flex-col gap-1">
-              <label className="text-[11px] text-muted-foreground">Step</label>
+              <label
+                htmlFor={`step-${field.id}`}
+                className="text-[11px] text-muted-foreground"
+              >
+                Step
+              </label>
               <Input
+                id={`step-${field.id}`}
                 type="number"
                 value={field.step}
                 min={0.001}
@@ -676,10 +694,14 @@ export function FieldConfig({ field }: FieldConfigProps) {
             <div className="space-y-1">
               <div className="flex gap-2">
                 <div className="flex flex-1 flex-col gap-1">
-                  <label className="text-[11px] text-muted-foreground">
+                  <label
+                    htmlFor={`val-min-${field.id}`}
+                    className="text-[11px] text-muted-foreground"
+                  >
                     Min {showNumberValidation ? "value" : "length"}
                   </label>
                   <Input
+                    id={`val-min-${field.id}`}
                     type="number"
                     min={showNumberValidation ? undefined : 1}
                     value={
@@ -699,10 +721,14 @@ export function FieldConfig({ field }: FieldConfigProps) {
                   />
                 </div>
                 <div className="flex flex-1 flex-col gap-1">
-                  <label className="text-[11px] text-muted-foreground">
+                  <label
+                    htmlFor={`val-max-${field.id}`}
+                    className="text-[11px] text-muted-foreground"
+                  >
                     Max {showNumberValidation ? "value" : "length"}
                   </label>
                   <Input
+                    id={`val-max-${field.id}`}
                     type="number"
                     min={showNumberValidation ? undefined : 1}
                     value={
