@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useMemo } from "react"
 import { EyeIcon } from "lucide-react"
 import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -109,40 +109,6 @@ export function PreviewForm({
   submitLabel,
   fields,
 }: PreviewFormProps) {
-  const schema = buildSchema(fields)
-  type FormValues = z.infer<typeof schema>
-
-  const form = useForm<FormValues>({
-    resolver: zodResolver(schema),
-    defaultValues: buildDefaultValues(fields) as FormValues,
-  })
-
-  // Reset form when fields change to avoid stale field state
-  const fieldResetKey = JSON.stringify(
-    fields.map((f) => ({
-      name: f.name,
-      defaultValue: f.defaultValue,
-      // The combobox value SHAPE depends on `multiple` (string vs string[]).
-      // Toggling it must re-init the form, or the control receives a stale
-      // value of the wrong shape.
-      multiple: f.type === "combobox" ? f.multiple : undefined,
-    }))
-  )
-  useEffect(() => {
-    form.reset(buildDefaultValues(fields) as FormValues)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fieldResetKey])
-
-  function onSubmit(values: FormValues) {
-    toast.message("Form submitted", {
-      description: (
-        <pre className="mt-1 max-h-48 overflow-auto rounded bg-background/5 text-xs">
-          {JSON.stringify(values, null, 2)}
-        </pre>
-      ),
-    })
-  }
-
   if (fields.length === 0) {
     return (
       <Empty className="border-none">
@@ -157,6 +123,51 @@ export function PreviewForm({
         </EmptyHeader>
       </Empty>
     )
+  }
+
+  // The form's identity depends on each field's name, configured default, and
+  // (for combobox) the value SHAPE implied by `multiple`. When any of those
+  // change, remounting the form via `key` re-initializes react-hook-form with
+  // fresh defaults — simpler and safer than resetting all state in an effect.
+  const fieldResetKey = JSON.stringify(
+    fields.map((f) => ({
+      name: f.name,
+      defaultValue: f.defaultValue,
+      multiple: f.type === "combobox" ? f.multiple : undefined,
+    }))
+  )
+
+  return (
+    <PreviewFormFields
+      key={fieldResetKey}
+      formName={formName}
+      submitLabel={submitLabel}
+      fields={fields}
+    />
+  )
+}
+
+function PreviewFormFields({
+  formName,
+  submitLabel,
+  fields,
+}: PreviewFormProps) {
+  const schema = useMemo(() => buildSchema(fields), [fields])
+  type FormValues = z.infer<typeof schema>
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: buildDefaultValues(fields) as FormValues,
+  })
+
+  function onSubmit(values: FormValues) {
+    toast.message("Form submitted", {
+      description: (
+        <pre className="mt-1 max-h-48 overflow-auto rounded bg-background/5 text-xs">
+          {JSON.stringify(values, null, 2)}
+        </pre>
+      ),
+    })
   }
 
   return (
