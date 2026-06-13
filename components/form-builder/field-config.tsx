@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useState } from "react"
 import {
   PlusIcon,
   Trash2Icon,
@@ -142,9 +142,8 @@ export function FieldConfig({ field }: FieldConfigProps) {
   const removeOption = useFormBuilderStore((s) => s.removeOption)
 
   // FieldConfig mounts fresh for each selected field (the parent renders it
-  // behind `key={field.id}` and only while selected), so these initialize
-  // correctly per field without an effect to reset them.
-  const nameManuallyEdited = useRef(false)
+  // behind `key={field.id}` and only while selected), so this initializes
+  // correctly per field without an effect to reset it.
   const [validationOpen, setValidationOpen] = useState(false)
 
   const showNumberValidation =
@@ -191,17 +190,10 @@ export function FieldConfig({ field }: FieldConfigProps) {
     } as Partial<FormField>)
   }
 
+  // The field name is a read-only, auto-derived schema key — it always tracks
+  // the label.
   function handleLabelChange(label: string) {
-    const updates: Partial<FormField> = { label }
-    if (!nameManuallyEdited.current) {
-      updates.name = labelToKey(label)
-    }
-    updateField(field.id, updates)
-  }
-
-  function handleNameChange(name: string) {
-    nameManuallyEdited.current = true
-    updateField(field.id, { name })
+    updateField(field.id, { label, name: labelToKey(label) })
   }
 
   return (
@@ -225,10 +217,9 @@ export function FieldConfig({ field }: FieldConfigProps) {
           <Input
             id={`name-${field.id}`}
             value={field.name}
-            onChange={(e) => handleNameChange(e.target.value)}
+            readOnly
             placeholder="fieldName"
             className="font-mono text-xs"
-            disabled
           />
         </LabeledRow>
 
