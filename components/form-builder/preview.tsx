@@ -8,7 +8,9 @@ import { CopyButton } from "./copy-button"
 import { PreviewForm } from "./preview-form"
 
 export function FormPreview() {
-  const { formName, submitLabel, fields } = useFormBuilderStore()
+  const formName = useFormBuilderStore((s) => s.formName)
+  const submitLabel = useFormBuilderStore((s) => s.submitLabel)
+  const fields = useFormBuilderStore((s) => s.fields)
   const code = generateFormCode(formName, submitLabel, fields)
 
   return (

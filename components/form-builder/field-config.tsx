@@ -137,8 +137,10 @@ interface FieldConfigProps {
 }
 
 export function FieldConfig({ field }: FieldConfigProps) {
-  const { updateField, addOption, updateOption, removeOption } =
-    useFormBuilderStore()
+  const updateField = useFormBuilderStore((s) => s.updateField)
+  const addOption = useFormBuilderStore((s) => s.addOption)
+  const updateOption = useFormBuilderStore((s) => s.updateOption)
+  const removeOption = useFormBuilderStore((s) => s.removeOption)
 
   const labelInputRef = useRef<HTMLInputElement>(null)
   const nameManuallyEdited = useRef(false)
