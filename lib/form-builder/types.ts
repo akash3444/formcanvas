@@ -25,7 +25,6 @@ interface BaseField {
   description: string
   descriptionPosition: DescriptionPosition
   required: boolean
-  disabled: boolean
   defaultValue?: string | number | boolean | string[]
 }
 

@@ -33,7 +33,7 @@ change without rewriting them.
   - `searchPlaceholder = "Search..."`
   - `emptyText = "No results found."`
   - `placeholder = ""`
-  - `required = false`, `disabled = false`
+  - `required = false`
   - `descriptionPosition = "below-control"`
   - `defaultValue` is unset (`undefined`)
 - **1.5** It starts with exactly 2 options: `Option 1 / option-1` and
@@ -100,10 +100,6 @@ checkbox-group. These scenarios must hold for it specifically.
   error **"Select at least one option"** and blocks submit.
 - **4.6** Required multiple combobox: selecting one or more options clears the
   error and allows submit; the submitted value is an array of the chosen values.
-
-### Disabled
-- **4.7** A disabled combobox cannot be interacted with and is visually disabled
-  in both modes and both display styles.
 
 ---
 

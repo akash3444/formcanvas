@@ -37,7 +37,6 @@ function base(name: string, label: string) {
     description: "",
     descriptionPosition: "below-control" as const,
     required: false,
-    disabled: false,
   }
 }
 

@@ -481,20 +481,15 @@ export function FieldConfig({ field }: FieldConfigProps) {
         </div>
       )}
 
-      <div className="space-y-2.5">
-        {field.type !== "slider" && (
+      {field.type !== "slider" && (
+        <div className="space-y-2.5">
           <SwitchRow
             label="Required"
             checked={field.required}
             onChange={(v) => updateField(field.id, { required: v })}
           />
-        )}
-        <SwitchRow
-          label="Disabled"
-          checked={field.disabled}
-          onChange={(v) => updateField(field.id, { disabled: v })}
-        />
-      </div>
+        </div>
+      )}
 
       {/* Textarea-specific: rows */}
       {field.type === "textarea" && (

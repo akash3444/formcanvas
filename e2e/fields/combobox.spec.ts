@@ -298,14 +298,4 @@ test.describe("combobox field", () => {
       expect(await h.submittedValues()).toEqual({ fw: "" })
     })
   })
-
-  test.describe("disabled", () => {
-    test("input style: the control is disabled", async ({ page }) => {
-      const h = new Harness(page)
-      await h.render(
-        oneField(combobox("fw", "Framework", FRAMEWORKS, { disabled: true }))
-      )
-      await expect(page.locator("#fw")).toBeDisabled()
-    })
-  })
 })
