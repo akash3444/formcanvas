@@ -1,6 +1,7 @@
 "use client"
 
 import { useMemo } from "react"
+import { Code2, Eye } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { generateFormCode } from "@/lib/form-builder/code-generator"
 import { useFormBuilderStore } from "@/lib/form-builder/store"
@@ -24,8 +25,8 @@ export function FormPreview() {
     >
       <div className="flex shrink-0 items-center justify-between border-b bg-sidebar px-4 py-2">
         <TabsList>
-          <TabsTrigger value="preview">Preview</TabsTrigger>
-          <TabsTrigger value="code">Code</TabsTrigger>
+          <TabsTrigger value="preview"><Eye />Preview</TabsTrigger>
+          <TabsTrigger value="code"><Code2 />Code</TabsTrigger>
         </TabsList>
 
         <TabsContent
