@@ -15,6 +15,7 @@ import {
 import { useFormBuilderStore } from "@/lib/form-builder/store"
 import { FORM_PRESETS, type FormPreset } from "@/lib/form-builder/presets"
 import { cn } from "@/lib/utils"
+import { TriangleAlertIcon } from "lucide-react"
 
 interface PresetsPanelProps {
   onLoad: () => void
@@ -86,6 +87,7 @@ export function PresetsPanel({ onLoad }: PresetsPanelProps) {
       >
         <AlertDialogContent size="sm">
           <AlertDialogHeader>
+            <TriangleAlertIcon className="my-2 size-8 fill-warning/10 stroke-[1.5] text-warning" />
             <AlertDialogTitle>Replace current form?</AlertDialogTitle>
             <AlertDialogDescription>
               Loading &ldquo;{pendingPreset?.name}&rdquo; will replace all your
