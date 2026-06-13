@@ -42,14 +42,6 @@ export function CodeBlock({ code }: CodeBlockProps) {
     }
   }, [code, resolvedTheme])
 
-  if (!html) {
-    return (
-      <pre className="p-4 font-mono text-xs leading-relaxed [font-variant-ligatures:none]">
-        <code>{code}</code>
-      </pre>
-    )
-  }
-
   // Safe: `html` is produced solely by Shiki from `code`, which is generated
   // by our own code-generator. Shiki HTML-escapes every token's text content,
   // and any user-supplied strings (labels, placeholders) are already escaped by

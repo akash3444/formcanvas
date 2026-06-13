@@ -80,6 +80,12 @@ function jsString(str: string): string {
   return JSON.stringify(str)
 }
 
+/** Emits a JSX placeholder attribute, using an expression for multiline values. */
+function placeholderProp(str: string): string {
+  if (!str.includes("\n")) return `placeholder="${escapeJsxAttr(str)}"`
+  return `placeholder={${jsString(str)}}`
+}
+
 function generateFieldJSX(field: FormField): string {
   const label = escapeJsxText(field.label || "Field")
   const { description, descriptionPosition } = field
@@ -102,7 +108,7 @@ function generateFieldJSX(field: FormField): string {
         f.inputType === "number"
           ? `id="${f.name}"
         type="number"
-        placeholder="${escapeJsxAttr(f.placeholder)}"
+        ${placeholderProp(f.placeholder)}
         aria-invalid={fieldState.invalid}
         value={field.value ?? ""}
         onChange={(e) => field.onChange(e.target.value === "" ? undefined : e.target.valueAsNumber)}
@@ -111,7 +117,7 @@ function generateFieldJSX(field: FormField): string {
         ref={field.ref}`
           : `id="${f.name}"
         type="${f.inputType}"
-        placeholder="${escapeJsxAttr(f.placeholder)}"
+        ${placeholderProp(f.placeholder)}
         aria-invalid={fieldState.invalid}
         {...field}`
       return `<Field data-invalid={!!form.formState.errors.${f.name}}>
@@ -142,7 +148,7 @@ function generateFieldJSX(field: FormField): string {
     render={({ field, fieldState }) => (
       <Textarea
         id="${f.name}"
-        placeholder="${escapeJsxAttr(f.placeholder)}"
+        ${placeholderProp(f.placeholder)}
         rows={${f.rows}}
         aria-invalid={fieldState.invalid}
         className="resize-none"
@@ -545,7 +551,7 @@ export function generateFormCode(
     .join("\n")
 
   const defaultValues = fields
-    .map((f) => `    ${f.name}: ${getDefaultValue(f)},`)
+    .map((f) => `      ${f.name}: ${getDefaultValue(f)},`)
     .join("\n")
 
   const fieldJSX = fields
@@ -554,21 +560,21 @@ export function generateFormCode(
 
   return `${getRequiredImports(fields)}
 
-${optionsSection}const ${camel}Schema = z.object({
+${optionsSection}const ${camel}FormSchema = z.object({
 ${schemaFields}
 })
 
-type ${pascal}Values = z.infer<typeof ${camel}Schema>
+type ${pascal}FormValues = z.infer<typeof ${camel}FormSchema>
 
 export function ${pascal}Form() {
-  const form = useForm<${pascal}Values>({
-    resolver: zodResolver(${camel}Schema),
+  const form = useForm<${pascal}FormValues>({
+    resolver: zodResolver(${camel}FormSchema),
     defaultValues: {
 ${defaultValues}
     },
   })
 
-  function onSubmit(values: ${pascal}Values) {
+  function onSubmit(values: ${pascal}FormValues) {
     console.log(values)
   }
 

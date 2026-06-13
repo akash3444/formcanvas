@@ -6,45 +6,12 @@ import {
   GripVerticalIcon,
   Trash2Icon,
   ChevronDownIcon,
-  Type,
-  AlignLeft,
-  CheckSquare,
-  ToggleLeft,
-  ChevronsUpDown,
-  CircleDot,
-  ListChecks,
-  SlidersHorizontal,
-  TextSearch,
 } from "lucide-react"
-import type { LucideIcon } from "lucide-react"
-import type { FormField, FieldType } from "@/lib/form-builder/types"
+import type { FormField } from "@/lib/form-builder/types"
 import { useFormBuilderStore } from "@/lib/form-builder/store"
 import { FieldConfig } from "./field-config"
+import { FIELD_ICONS, FIELD_LABELS } from "@/config/field"
 import { cn } from "@/lib/utils"
-
-const FIELD_ICONS: Record<FieldType, LucideIcon> = {
-  input: Type,
-  textarea: AlignLeft,
-  checkbox: CheckSquare,
-  switch: ToggleLeft,
-  select: ChevronsUpDown,
-  "radio-group": CircleDot,
-  "checkbox-group": ListChecks,
-  slider: SlidersHorizontal,
-  combobox: TextSearch,
-}
-
-const FIELD_LABELS: Record<FieldType, string> = {
-  input: "Input",
-  textarea: "Textarea",
-  checkbox: "Checkbox",
-  switch: "Switch",
-  select: "Select",
-  "radio-group": "Radio Group",
-  "checkbox-group": "Checkbox Group",
-  slider: "Slider",
-  combobox: "Combobox",
-}
 
 interface FieldItemProps {
   field: FormField
