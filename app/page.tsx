@@ -3,7 +3,7 @@ import type { Metadata } from "next"
 import { Button } from "@/components/ui/button"
 
 export const metadata: Metadata = {
-  title: "shadcn Form Builder",
+  title: "FormCanvas",
   description:
     "A visual form builder that generates production-ready React Hook Form + Zod code from shadcn/ui components.",
 }

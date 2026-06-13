@@ -228,7 +228,7 @@ export const useFormBuilderStore = create<FormBuilderStore>()(
         }),
     }),
     {
-      name: "shadcn-form-builder",
+      name: "form-builder",
       storage: createJSONStorage(() => localStorage),
     }
   )
