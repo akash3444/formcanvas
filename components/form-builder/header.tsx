@@ -31,7 +31,7 @@ export function BuilderHeader() {
           <span className="text-xs font-bold text-primary-foreground">F</span>
         </div>
         <div>
-          <h1 className="text-sm font-semibold">Shadcn Form Builder</h1>
+          <h1 className="text-sm font-semibold">FormCanvas</h1>
           <p className="text-xs text-muted-foreground">
             Build forms visually, copy production-ready code
           </p>

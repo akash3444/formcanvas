@@ -6,7 +6,7 @@ import { FieldEditor } from "@/components/form-builder/editor"
 import { FormPreview } from "@/components/form-builder/preview"
 
 export const metadata: Metadata = {
-  title: "Form Builder",
+  title: "Builder · FormCanvas",
   description:
     "Build forms visually with shadcn/ui components and copy production-ready React Hook Form + Zod code.",
 }
