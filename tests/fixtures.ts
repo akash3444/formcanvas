@@ -16,7 +16,6 @@ const base = {
   description: '',
   descriptionPosition: 'below-control' as const,
   required: false,
-  disabled: false,
 }
 
 export const makeInput = (o: Partial<InputField> = {}): InputField => ({

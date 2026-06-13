@@ -51,7 +51,6 @@ function createDefaultField(type: FieldType): FormField {
     description: "",
     descriptionPosition: "below-control" as const,
     required: false,
-    disabled: false,
   }
 
   const defaultOptions: FieldOption[] = [

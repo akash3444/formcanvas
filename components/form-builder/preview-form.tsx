@@ -66,7 +66,6 @@ function FieldWrapper({
   descriptionPosition,
   error,
   htmlFor,
-  disabled,
   children,
 }: {
   label: string
@@ -75,11 +74,10 @@ function FieldWrapper({
   descriptionPosition: "above-control" | "below-control"
   error?: string
   htmlFor?: string
-  disabled?: boolean
   children: React.ReactNode
 }) {
   return (
-    <Field data-invalid={!!error} data-disabled={disabled}>
+    <Field data-invalid={!!error}>
       <FieldLabel htmlFor={htmlFor}>
         {label}
         {required && <span className="text-destructive">*</span>}
@@ -182,7 +180,6 @@ export function PreviewForm({
                     descriptionPosition={field.descriptionPosition}
                     error={error}
                     htmlFor={field.name}
-                    disabled={field.disabled}
                   >
                     <Controller
                       name={field.name}
@@ -192,7 +189,6 @@ export function PreviewForm({
                           id={field.name}
                           type={field.inputType}
                           placeholder={field.placeholder}
-                          disabled={field.disabled}
                           aria-invalid={fieldState.invalid}
                           value={f.value ?? ""}
                           onChange={
@@ -224,7 +220,6 @@ export function PreviewForm({
                     descriptionPosition={field.descriptionPosition}
                     error={error}
                     htmlFor={field.name}
-                    disabled={field.disabled}
                   >
                     <Controller
                       name={field.name}
@@ -234,7 +229,6 @@ export function PreviewForm({
                           id={field.name}
                           placeholder={field.placeholder}
                           rows={field.rows}
-                          disabled={field.disabled}
                           aria-invalid={fieldState.invalid}
                           className="resize-none"
                           value={f.value as string}
@@ -254,7 +248,6 @@ export function PreviewForm({
                     key={field.id}
                     orientation="horizontal"
                     data-invalid={!!error}
-                    data-disabled={field.disabled}
                   >
                     <Controller
                       name={field.name}
@@ -264,7 +257,6 @@ export function PreviewForm({
                           id={field.name}
                           checked={Boolean(f.value)}
                           onCheckedChange={f.onChange}
-                          disabled={field.disabled}
                           aria-invalid={!!error}
                         />
                       )}
@@ -290,7 +282,6 @@ export function PreviewForm({
                     key={field.id}
                     orientation="horizontal"
                     data-invalid={!!error}
-                    data-disabled={field.disabled}
                   >
                     <FieldContent>
                       <FieldLabel htmlFor={field.name}>
@@ -312,7 +303,6 @@ export function PreviewForm({
                           id={field.name}
                           checked={Boolean(f.value)}
                           onCheckedChange={f.onChange}
-                          disabled={field.disabled}
                         />
                       )}
                     />
@@ -329,7 +319,6 @@ export function PreviewForm({
                     descriptionPosition={field.descriptionPosition}
                     error={error}
                     htmlFor={field.name}
-                    disabled={field.disabled}
                   >
                     <Controller
                       name={field.name}
@@ -384,7 +373,6 @@ export function PreviewForm({
                         <RadioGroup
                           value={String(f.value ?? "")}
                           onValueChange={f.onChange}
-                          disabled={field.disabled}
                           className={cn(
                             "flex gap-3",
                             field.orientation === "horizontal"
@@ -462,7 +450,6 @@ export function PreviewForm({
                                       : current.filter((v) => v !== opt.value)
                                   )
                                 }}
-                                disabled={field.disabled}
                               />
                               <FieldLabel
                                 htmlFor={`${field.name}-${opt.value}`}
@@ -487,7 +474,6 @@ export function PreviewForm({
                   <Field
                     key={field.id}
                     data-invalid={!!error}
-                    data-disabled={field.disabled}
                   >
                     <Controller
                       name={field.name}
@@ -512,7 +498,6 @@ export function PreviewForm({
                             min={field.min}
                             max={field.max}
                             step={field.step}
-                            disabled={field.disabled}
                           />
                           {field.description &&
                             field.descriptionPosition === "below-control" && (
@@ -549,7 +534,6 @@ export function PreviewForm({
                     descriptionPosition={field.descriptionPosition}
                     error={error}
                     htmlFor={field.name}
-                    disabled={field.disabled}
                   >
                     <Controller
                       name={field.name}
@@ -567,7 +551,6 @@ export function PreviewForm({
                                 itemToStringLabel={labelFor}
                                 value={arr}
                                 onValueChange={f.onChange}
-                                disabled={field.disabled}
                               >
                                 <ComboboxChips>
                                   <ComboboxValue>
@@ -582,7 +565,6 @@ export function PreviewForm({
                                   <ComboboxChipsInput
                                     id={field.name}
                                     placeholder={placeholder}
-                                    disabled={field.disabled}
                                   />
                                   {field.clearable && <ComboboxClear />}
                                 </ComboboxChips>
@@ -606,12 +588,10 @@ export function PreviewForm({
                               itemToStringLabel={labelFor}
                               value={arr}
                               onValueChange={f.onChange}
-                              disabled={field.disabled}
                             >
                               <ComboboxTrigger
                                 id={field.name}
                                 aria-invalid={fieldState.invalid}
-                                disabled={field.disabled}
                                 className={triggerClass}
                               >
                                 <span className="truncate">
@@ -652,12 +632,10 @@ export function PreviewForm({
                               itemToStringLabel={labelFor}
                               value={single || null}
                               onValueChange={(v) => f.onChange(v ?? "")}
-                              disabled={field.disabled}
                             >
                               <ComboboxTrigger
                                 id={field.name}
                                 aria-invalid={fieldState.invalid}
-                                disabled={field.disabled}
                                 className={triggerClass}
                               >
                                 <span className="truncate">
@@ -695,13 +673,11 @@ export function PreviewForm({
                             itemToStringLabel={labelFor}
                             value={single || null}
                             onValueChange={(v) => f.onChange(v ?? "")}
-                            disabled={field.disabled}
                           >
                             <ComboboxInput
                               id={field.name}
                               placeholder={placeholder}
                               showClear={field.clearable}
-                              disabled={field.disabled}
                               aria-invalid={fieldState.invalid}
                             />
                             <ComboboxContent>

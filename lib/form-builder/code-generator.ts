@@ -182,7 +182,6 @@ function generateFieldJSX(field: FormField): string {
           ? `id="${f.name}"
         type="number"
         placeholder="${escapeJsxAttr(f.placeholder)}"
-        disabled={${f.disabled}}
         aria-invalid={fieldState.invalid}
         value={field.value ?? ""}
         onChange={(e) => field.onChange(e.target.value === "" ? undefined : e.target.valueAsNumber)}
@@ -192,10 +191,9 @@ function generateFieldJSX(field: FormField): string {
           : `id="${f.name}"
         type="${f.inputType}"
         placeholder="${escapeJsxAttr(f.placeholder)}"
-        disabled={${f.disabled}}
         aria-invalid={fieldState.invalid}
         {...field}`
-      return `<Field data-invalid={!!form.formState.errors.${f.name}} data-disabled={${f.disabled}}>
+      return `<Field data-invalid={!!form.formState.errors.${f.name}}>
   <FieldLabel htmlFor="${f.name}">
     ${label}${requiredSpan}
   </FieldLabel>${descEl("above-control")}
@@ -213,7 +211,7 @@ function generateFieldJSX(field: FormField): string {
 
     case "textarea": {
       const f = field as TextareaField
-      return `<Field data-invalid={!!form.formState.errors.${f.name}} data-disabled={${f.disabled}}>
+      return `<Field data-invalid={!!form.formState.errors.${f.name}}>
   <FieldLabel htmlFor="${f.name}">
     ${label}${requiredSpan}
   </FieldLabel>${descEl("above-control")}
@@ -225,7 +223,6 @@ function generateFieldJSX(field: FormField): string {
         id="${f.name}"
         placeholder="${escapeJsxAttr(f.placeholder)}"
         rows={${f.rows}}
-        disabled={${f.disabled}}
         aria-invalid={fieldState.invalid}
         className="resize-none"
         {...field}
@@ -239,7 +236,7 @@ function generateFieldJSX(field: FormField): string {
       const descInner = description
         ? `\n    <FieldDescription>${escapeJsxText(description)}</FieldDescription>`
         : ""
-      return `<Field orientation="horizontal" data-invalid={!!form.formState.errors.${field.name}} data-disabled={${field.disabled}}>
+      return `<Field orientation="horizontal" data-invalid={!!form.formState.errors.${field.name}}>
   <Controller
     name="${field.name}"
     control={form.control}
@@ -248,7 +245,6 @@ function generateFieldJSX(field: FormField): string {
         id="${field.name}"
         checked={Boolean(field.value)}
         onCheckedChange={field.onChange}
-        disabled={${field.disabled}}
         aria-invalid={!!form.formState.errors.${field.name}}
       />
     )}
@@ -266,7 +262,7 @@ function generateFieldJSX(field: FormField): string {
       const descInner = description
         ? `\n    <FieldDescription>${escapeJsxText(description)}</FieldDescription>`
         : ""
-      return `<Field orientation="horizontal" data-invalid={!!form.formState.errors.${field.name}} data-disabled={${field.disabled}}>
+      return `<Field orientation="horizontal" data-invalid={!!form.formState.errors.${field.name}}>
   <FieldContent>
     <FieldLabel htmlFor="${field.name}">
       ${label}${requiredSpan}
@@ -281,7 +277,6 @@ function generateFieldJSX(field: FormField): string {
         id="${field.name}"
         checked={Boolean(field.value)}
         onCheckedChange={field.onChange}
-        disabled={${field.disabled}}
       />
     )}
   />
@@ -291,7 +286,7 @@ function generateFieldJSX(field: FormField): string {
     case "select": {
       const f = field as SelectField
       const constName = getOptionsConstName(f.name)
-      return `<Field data-invalid={!!form.formState.errors.${f.name}} data-disabled={${f.disabled}}>
+      return `<Field data-invalid={!!form.formState.errors.${f.name}}>
   <FieldLabel htmlFor="${f.name}">
     ${label}${requiredSpan}
   </FieldLabel>${descEl("above-control")}
@@ -299,7 +294,7 @@ function generateFieldJSX(field: FormField): string {
     name="${f.name}"
     control={form.control}
     render={({ field, fieldState }) => (
-      <Select value={String(field.value ?? "")} onValueChange={field.onChange} disabled={${f.disabled}} items={${constName}}>
+      <Select value={String(field.value ?? "")} onValueChange={field.onChange} items={${constName}}>
         <SelectTrigger id="${f.name}" aria-invalid={fieldState.invalid} className="w-full">
           <SelectValue placeholder="${escapeJsxAttr(f.placeholder) || "Select an option"}" />
         </SelectTrigger>
@@ -328,7 +323,7 @@ function generateFieldJSX(field: FormField): string {
     name="${f.name}"
     control={form.control}
     render={({ field }) => (
-      <RadioGroup value={String(field.value ?? "")} onValueChange={field.onChange} disabled={${f.disabled}} className="${layoutClass}">
+      <RadioGroup value={String(field.value ?? "")} onValueChange={field.onChange} className="${layoutClass}">
         {${constName}.map((o) => (
           <div key={o.value} className="flex items-center gap-2">
             <RadioGroupItem value={o.value} id={\`${f.name}-\${o.value}\`} />
@@ -370,7 +365,6 @@ function generateFieldJSX(field: FormField): string {
                     : current.filter((v) => v !== option.value)
                 )
               }}
-              disabled={${f.disabled}}
             />
             <FieldLabel htmlFor={\`${f.name}-\${option.value}\`}>{option.label}</FieldLabel>
           </div>
@@ -384,7 +378,7 @@ function generateFieldJSX(field: FormField): string {
 
     case "slider": {
       const f = field as SliderField
-      return `<Field data-invalid={!!form.formState.errors.${f.name}} data-disabled={${f.disabled}}>
+      return `<Field data-invalid={!!form.formState.errors.${f.name}}>
   <Controller
     name="${f.name}"
     control={form.control}
@@ -400,7 +394,6 @@ function generateFieldJSX(field: FormField): string {
           min={${f.min}}
           max={${f.max}}
           step={${f.step}}
-          disabled={${f.disabled}}
         />
       </>
     )}
@@ -425,15 +418,13 @@ function generateFieldJSX(field: FormField): string {
           ${constName}.find((o) => o.value === value)?.label ?? value
         }
         value={field.value ?? []}
-        onValueChange={field.onChange}
-        disabled={${f.disabled}}`
+        onValueChange={field.onChange}`
         : `items={${constName}.map((o) => o.value)}
         itemToStringLabel={(value) =>
           ${constName}.find((o) => o.value === value)?.label ?? value
         }
         value={field.value || null}
-        onValueChange={(value) => field.onChange(value ?? "")}
-        disabled={${f.disabled}}`
+        onValueChange={(value) => field.onChange(value ?? "")}`
 
       const list = `<ComboboxList>
           {(value) => {
@@ -460,7 +451,7 @@ function generateFieldJSX(field: FormField): string {
               ))
             }
           </ComboboxValue>
-          <ComboboxChipsInput id="${f.name}" placeholder="${placeholderAttr}" disabled={${f.disabled}} />${
+          <ComboboxChipsInput id="${f.name}" placeholder="${placeholderAttr}" />${
             f.clearable ? `\n          <ComboboxClear />` : ""
           }
         </ComboboxChips>
@@ -472,7 +463,7 @@ function generateFieldJSX(field: FormField): string {
         const triggerInner = f.multiple
           ? `{field.value && field.value.length > 0 ? \`\${field.value.length} selected\` : <span className="text-muted-foreground">${placeholderText}</span>}`
           : `{field.value ? (${constName}.find((o) => o.value === field.value)?.label ?? field.value) : <span className="text-muted-foreground">${placeholderText}</span>}`
-        control = `<ComboboxTrigger id="${f.name}" aria-invalid={fieldState.invalid} disabled={${f.disabled}} className="flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs">
+        control = `<ComboboxTrigger id="${f.name}" aria-invalid={fieldState.invalid} className="flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs">
           <span className="truncate">
             ${triggerInner}
           </span>
@@ -485,7 +476,7 @@ function generateFieldJSX(field: FormField): string {
       } else {
         control = `<ComboboxInput id="${f.name}" placeholder="${placeholderAttr}"${
           f.clearable ? " showClear" : ""
-        } disabled={${f.disabled}} aria-invalid={fieldState.invalid} />
+        } aria-invalid={fieldState.invalid} />
         <ComboboxContent>
           <ComboboxEmpty>${emptyTextText}</ComboboxEmpty>
           ${list}
@@ -494,7 +485,7 @@ function generateFieldJSX(field: FormField): string {
 
       const renderArgs = usesFieldState ? "{ field, fieldState }" : "{ field }"
 
-      return `<Field data-invalid={!!form.formState.errors.${f.name}} data-disabled={${f.disabled}}>
+      return `<Field data-invalid={!!form.formState.errors.${f.name}}>
   <FieldLabel htmlFor="${f.name}">
     ${label}${requiredSpan}
   </FieldLabel>${descEl("above-control")}

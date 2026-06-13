@@ -36,7 +36,6 @@ describe('§1 adding a combobox (store defaults)', () => {
     expect(f.emptyText).toBe('No results found.')
     expect(f.placeholder).toBe('Select an option')
     expect(f.required).toBe(false)
-    expect(f.disabled).toBe(false)
     expect(f.descriptionPosition).toBe('below-control')
     expect(f.defaultValue).toBeUndefined()
     expect(f.options).toHaveLength(2)
