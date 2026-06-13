@@ -1,10 +1,8 @@
 "use client"
 
-import { useState } from "react"
 import {
   PlusIcon,
   Trash2Icon,
-  ChevronDownIcon,
   XIcon,
   AlertCircleIcon,
 } from "lucide-react"
@@ -447,7 +445,8 @@ export function SliderRangeSection({ field }: { field: FormField }) {
 
 export function ValidationSection({ field }: { field: FormField }) {
   const updateField = useFormBuilderStore((s) => s.updateField)
-  const [open, setOpen] = useState(false)
+
+  if (field.type === "slider") return null
 
   const showNumberValidation =
     field.type === "input" && field.inputType === "number"
@@ -455,7 +454,6 @@ export function ValidationSection({ field }: { field: FormField }) {
     field.type === "textarea" ||
     (field.type === "input" &&
       ["text", "password", "tel"].includes(field.inputType))
-  if (!showNumberValidation && !showStringValidation) return null
 
   const numVal: NumberValidation =
     field.type === "input" && field.inputType === "number"
@@ -490,23 +488,17 @@ export function ValidationSection({ field }: { field: FormField }) {
 
   return (
     <div className="space-y-2.5">
-      <button
-        type="button"
-        className="flex w-full items-center justify-between"
-        onClick={() => setOpen((v) => !v)}
-      >
-        <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
-          Validation
-        </p>
-        <ChevronDownIcon
-          className={cn(
-            "size-3.5 text-muted-foreground transition-transform",
-            open && "rotate-180"
-          )}
-        />
-      </button>
+      <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+        Validation
+      </p>
 
-      {open && (
+      <SwitchRow
+        label="Required"
+        checked={field.required}
+        onChange={(v) => updateField(field.id, { required: v })}
+      />
+
+      {(showNumberValidation || showStringValidation) && (
         <div className="space-y-1">
           <div className="flex gap-2">
             <div className="flex flex-1 flex-col gap-1">

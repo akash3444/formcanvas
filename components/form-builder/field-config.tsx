@@ -20,7 +20,6 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   LabeledRow,
-  SwitchRow,
   DefaultValueSection,
   ComboboxSettingsSection,
   SliderRangeSection,
@@ -49,10 +48,6 @@ export function FieldConfig({ field }: FieldConfigProps) {
   return (
     <div className="divide-y *:p-4">
       <div className="space-y-2.5">
-        <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
-          Field Settings
-        </p>
-
         <LabeledRow label="Label" htmlFor={`label-${field.id}`}>
           <Input
             autoFocus
@@ -69,7 +64,7 @@ export function FieldConfig({ field }: FieldConfigProps) {
             value={field.name}
             readOnly
             placeholder="fieldName"
-            className="font-mono text-xs"
+            className="font-mono text-xs opacity-70 bg-muted"
           />
         </LabeledRow>
 
@@ -88,6 +83,23 @@ export function FieldConfig({ field }: FieldConfigProps) {
               />
             </LabeledRow>
           )}
+
+        {field.type === "textarea" && (
+          <LabeledRow label="Rows" htmlFor={`rows-${field.id}`}>
+            <Input
+              id={`rows-${field.id}`}
+              type="number"
+              min={1}
+              max={20}
+              value={field.rows}
+              onChange={(e) =>
+                updateField(field.id, {
+                  rows: Math.max(1, parseInt(e.target.value) || 1),
+                })
+              }
+            />
+          </LabeledRow>
+        )}
 
         {field.type === "input" && (
           <LabeledRow label="Input type">
@@ -160,33 +172,6 @@ export function FieldConfig({ field }: FieldConfigProps) {
       </div>
 
       <DefaultValueSection field={field} />
-
-      {field.type !== "slider" && (
-        <div className="space-y-2.5">
-          <SwitchRow
-            label="Required"
-            checked={field.required}
-            onChange={(v) => updateField(field.id, { required: v })}
-          />
-        </div>
-      )}
-
-      {field.type === "textarea" && (
-        <LabeledRow label="Rows" htmlFor={`rows-${field.id}`}>
-          <Input
-            id={`rows-${field.id}`}
-            type="number"
-            min={1}
-            max={20}
-            value={field.rows}
-            onChange={(e) =>
-              updateField(field.id, {
-                rows: Math.max(1, parseInt(e.target.value) || 1),
-              })
-            }
-          />
-        </LabeledRow>
-      )}
 
       {(field.type === "radio-group" || field.type === "checkbox-group") && (
         <LabeledRow label="Orientation">

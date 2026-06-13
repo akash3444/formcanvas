@@ -1,89 +1,46 @@
 "use client"
 
-import {
-  Type,
-  AlignLeft,
-  CheckSquare,
-  ToggleLeft,
-  ChevronsUpDown,
-  CircleDot,
-  ListChecks,
-  SlidersHorizontal,
-  TextSearch,
-} from "lucide-react"
-import type { LucideIcon } from "lucide-react"
 import type { FieldType } from "@/lib/form-builder/types"
 import { useFormBuilderStore } from "@/lib/form-builder/store"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Button } from "@/components/ui/button"
+import { FIELD_ICONS } from "@/config/field"
 import { cn } from "@/lib/utils"
 
 interface PaletteItem {
   type: FieldType
   label: string
   description: string
-  icon: LucideIcon
 }
 
-const PALETTE_ITEMS: PaletteItem[] = [
+interface PaletteCategory {
+  label: string
+  items: PaletteItem[]
+}
+
+const PALETTE_CATEGORIES: PaletteCategory[] = [
   {
-    type: "input",
-    label: "Input",
-    description: "Single-line text field",
-    icon: Type,
+    label: "Text",
+    items: [
+      { type: "input", label: "Input", description: "Single-line text" },
+      { type: "textarea", label: "Textarea", description: "Multi-line text" },
+    ],
   },
   {
-    type: "textarea",
-    label: "Textarea",
-    description: "Multi-line text field",
-    icon: AlignLeft,
+    label: "Selection",
+    items: [
+      { type: "select", label: "Select", description: "Dropdown picker" },
+      { type: "radio-group", label: "Radio Group", description: "Single choice" },
+      { type: "checkbox-group", label: "Checkbox Group", description: "Multiple choices" },
+      { type: "combobox", label: "Combobox", description: "Searchable picker" },
+    ],
   },
   {
-    type: "checkbox",
-    label: "Checkbox",
-    description: "Boolean toggle with label",
-    icon: CheckSquare,
-  },
-  {
-    type: "checkbox-group",
-    label: "Checkbox Group",
-    description: "Multiple choices from a list",
-    icon: ListChecks,
-  },
-  {
-    type: "switch",
-    label: "Switch",
-    description: "On/off toggle control",
-    icon: ToggleLeft,
-  },
-  {
-    type: "select",
-    label: "Select",
-    description: "Dropdown option picker",
-    icon: ChevronsUpDown,
-  },
-  {
-    type: "combobox",
-    label: "Combobox",
-    description: "Searchable option picker",
-    icon: TextSearch,
-  },
-  {
-    type: "radio-group",
-    label: "Radio Group",
-    description: "Single choice from a list",
-    icon: CircleDot,
-  },
-  {
-    type: "slider",
-    label: "Slider",
-    description: "Numeric range selector",
-    icon: SlidersHorizontal,
+    label: "Toggle & Numeric",
+    items: [
+      { type: "checkbox", label: "Checkbox", description: "Boolean toggle" },
+      { type: "switch", label: "Switch", description: "On/off toggle" },
+      { type: "slider", label: "Slider", description: "Range selector" },
+    ],
   },
 ]
 
@@ -100,30 +57,40 @@ export function FieldPalette() {
       </div>
 
       <ScrollArea className="flex-1">
-        <div className="grid grid-cols-1 gap-2 p-3">
-          {PALETTE_ITEMS.map((item) => (
-            <Tooltip key={item.type}>
-              <TooltipTrigger
-                render={
-                  <Button
-                    variant="outline"
-                    onClick={() => addField(item.type)}
-                    className={cn(
-                      "group h-auto w-full justify-start gap-3 p-1.5",
-                      "bg-background! hover:bg-accent!"
-                    )}
-                  />
-                }
-              >
-                <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-muted transition-colors group-hover:bg-background">
-                  <item.icon className="size-4 text-muted-foreground" />
-                </div>
-                <span className="text-sm font-medium">{item.label}</span>
-              </TooltipTrigger>
-              <TooltipContent side="right">
-                <p>{item.description}</p>
-              </TooltipContent>
-            </Tooltip>
+        <div className="space-y-4 p-3">
+          {PALETTE_CATEGORIES.map((category) => (
+            <div key={category.label} className="space-y-2">
+              <p className="px-1 text-xs font-medium text-muted-foreground">
+                {category.label}
+              </p>
+              <div className="space-y-1">
+                {category.items.map((item) => {
+                  const Icon = FIELD_ICONS[item.type]
+                  return (
+                    <button
+                      key={item.type}
+                      onClick={() => addField(item.type)}
+                      className={cn(
+                        "flex w-full items-center rounded-md border bg-background text-left",
+                        "hover:bg-accent"
+                      )}
+                    >
+                      <div className="flex shrink-0 items-center justify-center self-stretch border-e border-dashed border-border px-3">
+                        <Icon className="size-4 text-muted-foreground" />
+                      </div>
+                      <div className="min-w-0 px-3 py-1.5">
+                        <span className="block truncate text-sm font-medium">
+                          {item.label}
+                        </span>
+                        <span className="block truncate text-xs text-muted-foreground">
+                          {item.description}
+                        </span>
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
           ))}
         </div>
       </ScrollArea>
