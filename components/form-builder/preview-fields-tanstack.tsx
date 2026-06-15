@@ -1,7 +1,5 @@
 "use client"
 
-import { useState } from "react"
-import { EyeIcon, EyeOffIcon } from "lucide-react"
 import type { AnyFieldApi } from "@tanstack/react-form"
 import {
   Field,
@@ -12,15 +10,10 @@ import {
   FieldLegend,
   FieldSet,
 } from "@/components/ui/field"
-import type { FormField, PasswordField } from "@/lib/form-builder/types"
+import type { FormField } from "@/lib/form-builder/types"
 import { Slider } from "@/components/ui/slider"
 import { Input } from "@/components/ui/input"
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-  InputGroupInput,
-} from "@/components/ui/input-group"
+import { PasswordInput } from "@/components/ui/password-input"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Switch } from "@/components/ui/switch"
@@ -85,60 +78,6 @@ function FieldWrapper({
   )
 }
 
-/**
- * Password control with its own visibility state. Split into a component so the
- * `useState` hook isn't called from inside the TanstackPreviewField switch.
- */
-function PasswordControl({
-  field,
-  api,
-  isInvalid,
-}: {
-  field: PasswordField
-  api: AnyFieldApi
-  isInvalid: boolean
-}) {
-  const [show, setShow] = useState(false)
-  if (!field.showToggle) {
-    return (
-      <Input
-        id={field.name}
-        name={field.name}
-        type="password"
-        placeholder={field.placeholder}
-        aria-invalid={isInvalid}
-        value={api.state.value ?? ""}
-        onChange={(e) => api.handleChange(e.target.value)}
-        onBlur={api.handleBlur}
-      />
-    )
-  }
-  return (
-    <InputGroup>
-      <InputGroupInput
-        id={field.name}
-        name={field.name}
-        type={show ? "text" : "password"}
-        placeholder={field.placeholder}
-        aria-invalid={isInvalid}
-        value={api.state.value ?? ""}
-        onChange={(e) => api.handleChange(e.target.value)}
-        onBlur={api.handleBlur}
-      />
-      <InputGroupAddon align="inline-end">
-        <InputGroupButton
-          type="button"
-          size="icon-xs"
-          aria-label={show ? "Hide password" : "Show password"}
-          onClick={() => setShow((prev) => !prev)}
-        >
-          {show ? <EyeOffIcon /> : <EyeIcon />}
-        </InputGroupButton>
-      </InputGroupAddon>
-    </InputGroup>
-  )
-}
-
 interface TanstackPreviewFieldProps {
   field: FormField
   /** The TanStack field API from the surrounding `<form.Field>` render prop. */
@@ -195,7 +134,16 @@ export function TanstackPreviewField({ field, api }: TanstackPreviewFieldProps) 
           errors={errors}
           htmlFor={field.name}
         >
-          <PasswordControl field={field} api={api} isInvalid={isInvalid} />
+          <PasswordInput
+            id={field.name}
+            name={field.name}
+            showToggle={field.showToggle}
+            placeholder={field.placeholder}
+            aria-invalid={isInvalid}
+            value={api.state.value ?? ""}
+            onChange={(e) => api.handleChange(e.target.value)}
+            onBlur={api.handleBlur}
+          />
         </FieldWrapper>
       )
 

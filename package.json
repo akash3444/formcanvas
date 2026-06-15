@@ -4,12 +4,17 @@
   "type": "module",
   "private": true,
   "scripts": {
+    "gen:companions": "tsx scripts/generate-companion-sources.ts",
+    "predev": "pnpm gen:companions",
     "dev": "next dev",
+    "prebuild": "pnpm gen:companions",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
+    "pretypecheck": "pnpm gen:companions",
     "typecheck": "tsc --noEmit",
+    "pretypecheck:codegen": "pnpm gen:companions",
     "typecheck:codegen": "tsx scripts/typecheck-codegen.ts"
   },
   "dependencies": {

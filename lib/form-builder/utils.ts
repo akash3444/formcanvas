@@ -54,6 +54,13 @@ export function labelToKey(label: string): string {
   return result.replace(/^\d+/, "") || "field"
 }
 
+/** "ContactUs" → "contact-us" */
+export function toKebabCase(str: string): string {
+  return str
+    .replace(/([a-z0-9])([A-Z])/g, "$1-$2")
+    .toLowerCase()
+}
+
 /** "contact us" → "ContactUs" */
 export function toPascalCase(label: string): string {
   return label

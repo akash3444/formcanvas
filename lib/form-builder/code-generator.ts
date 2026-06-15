@@ -10,7 +10,7 @@ import type {
   SliderField,
   ComboboxField,
 } from "./types"
-import { toPascalCase } from "./utils"
+import { toKebabCase, toPascalCase } from "./utils"
 import {
   indent,
   getOptionsConstName,
@@ -24,9 +24,8 @@ import {
   buildOptionsSection,
   buildSchemaBlock,
   buildDefaultValueLines,
-  buildPasswordStateLines,
-  passwordShowVar,
 } from "./codegen-shared"
+import { collectCompanions, type GeneratedFile } from "./codegen-companions"
 import { generateTanstackFormCode } from "./code-generator-tanstack"
 
 function generateFieldJSX(field: FormField): string {
@@ -75,39 +74,7 @@ function generateFieldJSX(field: FormField): string {
 
     case "password": {
       const f = field as PasswordField
-      const control = f.showToggle
-        ? (() => {
-            const show = passwordShowVar(f)
-            const setShow = `setShow${
-              f.name.charAt(0).toUpperCase() + f.name.slice(1)
-            }`
-            return `<InputGroup>
-        <InputGroupInput
-          id="${f.name}"
-          type={${show} ? "text" : "password"}
-          ${placeholderProp(f.placeholder)}
-          aria-invalid={fieldState.invalid}
-          {...field}
-        />
-        <InputGroupAddon align="inline-end">
-          <InputGroupButton
-            type="button"
-            size="icon-xs"
-            aria-label={${show} ? "Hide password" : "Show password"}
-            onClick={() => ${setShow}((prev) => !prev)}
-          >
-            {${show} ? <EyeOffIcon /> : <EyeIcon />}
-          </InputGroupButton>
-        </InputGroupAddon>
-      </InputGroup>`
-          })()
-        : `<Input
-        id="${f.name}"
-        type="password"
-        ${placeholderProp(f.placeholder)}
-        aria-invalid={fieldState.invalid}
-        {...field}
-      />`
+      const showToggleLine = f.showToggle ? "" : `\n        showToggle={false}`
       return `<Field data-invalid={!!form.formState.errors.${f.name}}>
   <FieldLabel htmlFor="${f.name}">
     ${label}${reqSpan}
@@ -116,7 +83,12 @@ function generateFieldJSX(field: FormField): string {
     name="${f.name}"
     control={form.control}
     render={({ field, fieldState }) => (
-      ${control}
+      <PasswordInput
+        id="${f.name}"${showToggleLine}
+        ${placeholderProp(f.placeholder)}
+        aria-invalid={fieldState.invalid}
+        {...field}
+      />
     )}
   />${descEl(field, "below-control")}${errorEl}
 </Field>`
@@ -436,7 +408,7 @@ function generateReactHookFormCode(
 ${buildOptionsSection(fields)}${buildSchemaBlock(camel, pascal, fields)}
 
 export function ${pascal}Form() {
-${buildPasswordStateLines(fields)}  const form = useForm<${pascal}FormValues>({
+  const form = useForm<${pascal}FormValues>({
     resolver: zodResolver(${camel}FormSchema),
     defaultValues: {
 ${buildDefaultValueLines(fields)}
@@ -460,23 +432,39 @@ ${fieldJSX}
 }
 
 /**
- * Generates the form component source for the given fields and selected form
- * library. Dispatches to the per-library generator; both share the Zod schema,
- * options constants, and shadcn imports via codegen-shared.ts.
+ * Generates the files for the given fields and selected form library: the form
+ * component plus any companion component files its field types require (e.g.
+ * `password-input.tsx`). Both per-library generators share the Zod schema,
+ * options constants, and shadcn imports via codegen-shared.ts. The form file is
+ * always first; companions follow in a stable, deduped order.
  */
 export function generateFormCode(
   formName: string,
   submitLabel: string,
   fields: FormField[],
   formLibrary: FormLibrary = "react-hook-form"
-): string {
+): GeneratedFile[] {
   if (fields.length === 0) {
-    return `// Add fields to your form to generate code.`
+    return [
+      {
+        filename: "form.tsx",
+        language: "tsx",
+        code: `// Add fields to your form to generate code.`,
+      },
+    ]
   }
 
-  if (formLibrary === "tanstack-form") {
-    return generateTanstackFormCode(formName, submitLabel, fields)
+  const pascal = toPascalCase(formName) || "My"
+  const formCode =
+    formLibrary === "tanstack-form"
+      ? generateTanstackFormCode(formName, submitLabel, fields)
+      : generateReactHookFormCode(formName, submitLabel, fields)
+
+  const formFile: GeneratedFile = {
+    filename: `${toKebabCase(pascal)}-form.tsx`,
+    language: "tsx",
+    code: formCode,
   }
 
-  return generateReactHookFormCode(formName, submitLabel, fields)
+  return [formFile, ...collectCompanions(fields)]
 }

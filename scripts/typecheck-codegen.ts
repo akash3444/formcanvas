@@ -66,7 +66,10 @@ const project = new Project({
 const cases: GeneratedCase[] = []
 for (const fixture of fixtures) {
   for (const lib of LIBRARIES) {
-    const code = generateFormCode(
+    // The form file is always first; companion files (e.g. password-input.tsx)
+    // are emitted verbatim from real on-disk components, so the form's imports
+    // of them resolve against the actual project and need no separate check.
+    const [formFile] = generateFormCode(
       fixture.formName,
       fixture.submitLabel,
       fixture.fields,
@@ -75,8 +78,8 @@ for (const fixture of fixtures) {
     // Anchor virtual files at the repo root so "@/..." imports resolve exactly
     // as they would in the app. The files stay in memory unless --write is set.
     const filePath = path.join(VIRTUAL_DIR, `${fixture.name}.${libSlug[lib]}.tsx`)
-    project.createSourceFile(filePath, code, { overwrite: true })
-    cases.push({ id: `${fixture.name} [${lib}]`, filePath, code })
+    project.createSourceFile(filePath, formFile.code, { overwrite: true })
+    cases.push({ id: `${fixture.name} [${lib}]`, filePath, code: formFile.code })
   }
 }
 
