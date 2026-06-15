@@ -9,7 +9,7 @@ export function Cta() {
         </h2>
         <p className="mx-auto mt-4 max-w-[48ch] text-base text-pretty text-primary-foreground/70">
           No signup, no setup. Open the builder and copy production-ready code
-          in minutes.
+          straight into your project.
         </p>
         <div className="mt-8 flex justify-center">
           <CtaButton

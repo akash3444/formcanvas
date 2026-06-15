@@ -18,7 +18,7 @@ const FEATURES = [
     icon: LayersIcon,
     title: "Nine field types",
     description:
-      "Inputs, selects, checkboxes, switches, radios, sliders, comboboxes and more, each fully configurable.",
+      "Inputs, textareas, selects, checkboxes, switches, radios, sliders, and comboboxes — each fully configurable.",
   },
   {
     icon: ShieldCheckIcon,
@@ -53,7 +53,7 @@ export function Features() {
         <div className="flex flex-col gap-x-8 gap-y-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-sm font-medium text-muted-foreground">
-              Everything you need
+              Built for the boring part
             </p>
             <h2 className="mt-2 max-w-[20ch] text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
               A faster way to build real forms.

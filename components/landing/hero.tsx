@@ -32,9 +32,10 @@ export function Hero() {
           <h1 className="mx-auto max-w-[20ch] text-4xl font-semibold tracking-tighter text-balance sm:text-6xl/[1.15]">
             Build forms visually. Ship production code.
           </h1>
-          <p className="mx-auto mt-6 max-w-[52ch] text-base text-pretty text-muted-foreground sm:text-lg">
-            Drag fields, set validation, and copy fully typed React Hook Form or
-            TanStack Form code with Zod — no boilerplate.
+          <p className="mx-auto mt-6 max-w-[60ch] text-base text-pretty text-muted-foreground sm:text-lg">
+            Stop hand-wiring schemas, components, and validation. Drag fields,
+            set the rules, and copy fully typed React Hook Form or TanStack Form
+            code with Zod.
           </p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row">
             <CtaButton location="hero" />
