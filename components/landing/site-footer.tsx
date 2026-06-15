@@ -1,22 +1,13 @@
 import Link from "next/link"
 
+import { Logo } from "@/components/logo"
+
 export function SiteFooter() {
   return (
     <footer className="border-t border-border/60">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-8 sm:flex-row">
-        <Link
-          href="/"
-          aria-label="Homepage"
-          className="flex items-center gap-2"
-        >
-          <span className="flex size-6 items-center justify-center rounded-md bg-primary">
-            <span className="text-[0.625rem] font-bold text-primary-foreground">
-              F
-            </span>
-          </span>
-          <span className="text-sm font-semibold tracking-tight">
-            FormCanvas
-          </span>
+        <Link href="/" aria-label="Homepage">
+          <Logo />
         </Link>
         <nav
           className="flex items-center gap-6 text-sm text-muted-foreground"

@@ -1,6 +1,7 @@
 import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
+import { Logo } from "@/components/logo"
 import { CtaButton } from "@/components/landing/cta-button"
 
 import { ThemeToggle } from "./theme-toggle"
@@ -15,17 +16,8 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-md">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-6">
-        <Link
-          href="/"
-          aria-label="Homepage"
-          className="flex items-center gap-2"
-        >
-          <span className="flex size-7 items-center justify-center rounded-md bg-primary">
-            <span className="text-xs font-bold text-primary-foreground">F</span>
-          </span>
-          <span className="text-sm font-semibold tracking-tight">
-            FormCanvas
-          </span>
+        <Link href="/" aria-label="Homepage">
+          <Logo />
         </Link>
 
         <nav
