@@ -2,8 +2,14 @@
 
 import posthog from "posthog-js"
 import { useMemo, useState } from "react"
-import { Code2, Eye } from "lucide-react"
+import { Code2, Eye, RotateCcwIcon } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Button } from "@/components/ui/button"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import {
   Select,
   SelectContent,
@@ -51,10 +57,7 @@ export function FormPreview() {
   )
   // Hidden fields stay in the builder but are excluded from both the rendered
   // preview and the generated code
-  const visibleFields = useMemo(
-    () => fields.filter((f) => !f.hidden),
-    [fields]
-  )
+  const visibleFields = useMemo(() => fields.filter((f) => !f.hidden), [fields])
   const files = useMemo(
     () => generateFormCode(formName, submitLabel, visibleFields, formLibrary),
     [formName, submitLabel, visibleFields, formLibrary]
@@ -65,10 +68,16 @@ export function FormPreview() {
   const activeFile =
     files.find((f) => f.filename === activeFilename) ?? files[0]
 
+  const [tab, setTab] = useState("preview")
+  // Bumping this remounts the previewed form, re-initializing it with fresh
+  // default values — the same mechanism PreviewForm uses for field changes.
+  const [resetKey, setResetKey] = useState(0)
+
   return (
     <Tabs
-      defaultValue="preview"
+      value={tab}
       onValueChange={(value) => {
+        setTab(value)
         if (value === "code") {
           posthog.capture("code_viewed", { form_library: formLibrary })
         }
@@ -87,30 +96,58 @@ export function FormPreview() {
           </TabsTrigger>
         </TabsList>
 
-        <Select
-          value={formLibrary}
-          onValueChange={(value) => {
-            posthog.capture("form_library_switched", {
-              from_library: formLibrary,
-              to_library: value,
-            })
-            setFormLibrary(value as FormLibrary)
-          }}
-          items={FORM_LIBRARY_OPTIONS}
-        >
-          <SelectTrigger size="sm" className="w-46">
-            {currentLibrary && <LibraryLogo src={currentLibrary.icon} alt="" />}
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {FORM_LIBRARY_OPTIONS.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                <LibraryLogo src={option.icon} alt="" />
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-2">
+          {tab === "preview" && visibleFields.length > 0 && (
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label="Reset form"
+                    onClick={() => setResetKey((k) => k + 1)}
+                    className="hit-area-2"
+                  />
+                }
+              >
+                <RotateCcwIcon
+                  className="transition-transform duration-500 ease-out"
+                  style={{ transform: `rotate(${resetKey * -360}deg)` }}
+                />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Reset form values</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
+
+          <Select
+            value={formLibrary}
+            onValueChange={(value) => {
+              posthog.capture("form_library_switched", {
+                from_library: formLibrary,
+                to_library: value,
+              })
+              setFormLibrary(value as FormLibrary)
+            }}
+            items={FORM_LIBRARY_OPTIONS}
+          >
+            <SelectTrigger size="sm" className="w-46">
+              {currentLibrary && (
+                <LibraryLogo src={currentLibrary.icon} alt="" />
+              )}
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {FORM_LIBRARY_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  <LibraryLogo src={option.icon} alt="" />
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <TabsContent value="preview" className="m-0 flex-1 overflow-y-auto p-6">
@@ -119,10 +156,14 @@ export function FormPreview() {
           submitLabel={submitLabel}
           fields={visibleFields}
           formLibrary={formLibrary}
+          resetKey={resetKey}
         />
       </TabsContent>
 
-      <TabsContent value="code" className="m-0 flex flex-1 flex-col overflow-hidden">
+      <TabsContent
+        value="code"
+        className="m-0 flex flex-1 flex-col overflow-hidden"
+      >
         {files.length > 1 && (
           <div className="flex shrink-0 items-center gap-1 border-b bg-sidebar px-2 py-1.5">
             {files.map((file) => (

@@ -26,6 +26,8 @@ interface PreviewFormProps {
   submitLabel: string
   fields: FormField[]
   formLibrary: FormLibrary
+  /** Incremented by the panel's reset control to re-initialize the form. */
+  resetKey?: number
 }
 
 function submittedToast(values: unknown) {
@@ -43,6 +45,7 @@ export function PreviewForm({
   submitLabel,
   fields,
   formLibrary,
+  resetKey,
 }: PreviewFormProps) {
   if (fields.length === 0) {
     return (
@@ -67,6 +70,7 @@ export function PreviewForm({
   // effect, and it cleanly swaps the RHF and TanStack form hooks.
   const fieldResetKey = JSON.stringify({
     formLibrary,
+    resetKey,
     fields: fields.map((f) => ({
       name: f.name,
       defaultValue: f.defaultValue,
