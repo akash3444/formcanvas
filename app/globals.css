@@ -2,6 +2,12 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+/* fumadocs: shadcn preset maps fumadocs --color-fd-* tokens onto this app's
+   existing shadcn theme variables, so the changelog follows the same
+   light/dark theme. */
+@import "fumadocs-ui/css/shadcn.css";
+@import "fumadocs-ui/css/preset.css";
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

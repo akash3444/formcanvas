@@ -12,8 +12,9 @@ import { CtaButton } from "@/components/landing/cta-button"
 import { ThemeToggle } from "./theme-toggle"
 
 const NAV_LINKS = [
-  { label: "Features", href: "#features" },
-  { label: "How it works", href: "#how-it-works" },
+  { label: "Features", href: "/#features" },
+  { label: "How it works", href: "/#how-it-works" },
+  { label: "Changelog", href: "/changelog" },
   { label: "Builder", href: "/builder" },
 ]
 
