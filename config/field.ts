@@ -9,6 +9,7 @@ import {
   ListChecks,
   SlidersHorizontal,
   TextSearch,
+  CalendarDays,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import type { FieldType } from "@/lib/form-builder/types"
@@ -24,6 +25,7 @@ export const FIELD_ICONS: Record<FieldType, LucideIcon> = {
   "checkbox-group": ListChecks,
   slider: SlidersHorizontal,
   combobox: TextSearch,
+  date: CalendarDays,
 }
 
 export const FIELD_LABELS: Record<FieldType, string> = {
@@ -37,4 +39,5 @@ export const FIELD_LABELS: Record<FieldType, string> = {
   "checkbox-group": "Checkbox Group",
   slider: "Slider",
   combobox: "Combobox",
+  date: "Date",
 }

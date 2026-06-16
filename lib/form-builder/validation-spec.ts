@@ -1,5 +1,18 @@
 import { z } from "zod"
-import type { FormField, NumberValidation, StringValidation } from "./types"
+import { format, isWeekend, parseISO, startOfToday } from "date-fns"
+import type {
+  FormField,
+  DateField,
+  DateRangeValue,
+  NumberValidation,
+  StringValidation,
+} from "./types"
+
+// Date fields don't reduce to the base/ops/tail SchemaSpec — they need
+// `z.date()`, real Date bounds, weekend/past refinements, and an object wrapper
+// for ranges. So they're handled by a dedicated branch (below) and excluded
+// from the generic spec pipeline at the type level.
+type SpecField = Exclude<FormField, DateField>
 
 /**
  * Single source of truth for field validation. Each field reduces to a
@@ -84,7 +97,7 @@ function arraySpec(required: boolean): SchemaSpec {
 }
 
 /** Reduces a field to its serializable validation spec. */
-export function fieldSchemaSpec(field: FormField): SchemaSpec {
+export function fieldSchemaSpec(field: SpecField): SchemaSpec {
   switch (field.type) {
     case "input": {
       if (field.inputType === "number") {
@@ -271,7 +284,7 @@ export function serializeSpec(spec: SchemaSpec): string {
 }
 
 /** The type default for a field, ignoring any configured `defaultValue`. */
-function fieldTypeDefault(field: FormField): unknown {
+function fieldTypeDefault(field: SpecField): unknown {
   switch (field.type) {
     case "input":
       return field.inputType === "number" ? undefined : ""
@@ -293,7 +306,7 @@ function fieldTypeDefault(field: FormField): unknown {
 }
 
 /** The effective default value for a field (configured override or type default). */
-export function defaultValueFor(field: FormField): unknown {
+export function defaultValueFor(field: SpecField): unknown {
   return field.defaultValue !== undefined
     ? field.defaultValue
     : fieldTypeDefault(field)
@@ -307,4 +320,189 @@ export function serializeDefault(value: unknown): string {
   if (typeof value === "boolean") return String(value)
   if (Array.isArray(value)) return JSON.stringify(value)
   return "undefined"
+}
+
+// ---------------------------------------------------------------------------
+// Date fields — dedicated branch
+// ---------------------------------------------------------------------------
+//
+// A single date is `z.date().optional()` (the control holds `Date | undefined`
+// until a day is picked); a range is an optional `{ from, to }` object. Bounds
+// and weekend/past rules become `.refine()`s — defined once below as
+// `DateConstraint`s and consumed by both the live Zod builder (for the preview)
+// and the source-string emitter (for codegen), so the two never drift. ISO
+// `yyyy-MM-dd` strings are parsed with `parseISO` (local midnight) to match how
+// react-day-picker compares calendar days.
+
+interface DateConstraint {
+  /** Predicate for the live schema. */
+  live: (d: Date) => boolean
+  /** Equivalent boolean expression over a Date-valued variable, for codegen. */
+  expr: (v: string) => string
+  message: string
+}
+
+function humanDate(iso: string): string {
+  return format(parseISO(iso), "PPP")
+}
+
+function dateConstraints(field: DateField): DateConstraint[] {
+  const cs: DateConstraint[] = []
+  if (field.minDate) {
+    const iso = field.minDate
+    cs.push({
+      live: (d) => d >= parseISO(iso),
+      expr: (v) => `${v} >= parseISO(${JSON.stringify(iso)})`,
+      message: `Date must be on or after ${humanDate(iso)}`,
+    })
+  }
+  if (field.maxDate) {
+    const iso = field.maxDate
+    cs.push({
+      live: (d) => d <= parseISO(iso),
+      expr: (v) => `${v} <= parseISO(${JSON.stringify(iso)})`,
+      message: `Date must be on or before ${humanDate(iso)}`,
+    })
+  }
+  if (field.disablePastDates) {
+    cs.push({
+      live: (d) => d >= startOfToday(),
+      expr: (v) => `${v} >= startOfToday()`,
+      message: "Date cannot be in the past",
+    })
+  }
+  if (field.disableWeekends) {
+    cs.push({
+      live: (d) => !isWeekend(d),
+      expr: (v) => `!isWeekend(${v})`,
+      message: "Weekends are not allowed",
+    })
+  }
+  return cs
+}
+
+/** Builds the live Zod schema for a date field (used by the preview). */
+export function dateLiveSchema(field: DateField): z.ZodTypeAny {
+  const cs = dateConstraints(field)
+  if (field.mode === "range") {
+    let s: z.ZodTypeAny = z
+      .object({ from: z.date().optional(), to: z.date().optional() })
+      .optional()
+    if (field.required)
+      s = s.refine(
+        (v: DateRangeValueDates | undefined) =>
+          !!v && v.from !== undefined && v.to !== undefined,
+        "Please select a date range"
+      )
+    for (const c of cs)
+      s = s.refine(
+        (v: DateRangeValueDates | undefined) =>
+          !v ||
+          ((v.from === undefined || c.live(v.from)) &&
+            (v.to === undefined || c.live(v.to))),
+        c.message
+      )
+    return s
+  }
+  let s: z.ZodTypeAny = z.date().optional()
+  if (field.required)
+    s = s.refine((v: Date | undefined) => v !== undefined, "This field is required")
+  for (const c of cs)
+    s = s.refine(
+      (v: Date | undefined) => v === undefined || c.live(v),
+      c.message
+    )
+  return s
+}
+
+/** The runtime range value shape once parsed to Date objects. */
+interface DateRangeValueDates {
+  from?: Date
+  to?: Date
+}
+
+/** Emits the Zod source string for a date field (mirror of the live schema). */
+export function dateZodString(field: DateField): string {
+  const cs = dateConstraints(field)
+  if (field.mode === "range") {
+    let s =
+      "z.object({ from: z.date().optional(), to: z.date().optional() }).optional()"
+    if (field.required)
+      s +=
+        '.refine((v) => !!v && v.from !== undefined && v.to !== undefined, "Please select a date range")'
+    for (const c of cs)
+      s += `.refine((v) => !v || ((v.from === undefined || (${c.expr(
+        "v.from"
+      )})) && (v.to === undefined || (${c.expr("v.to")}))), ${JSON.stringify(
+        c.message
+      )})`
+    return s
+  }
+  let s = "z.date().optional()"
+  if (field.required)
+    s += '.refine((v) => v !== undefined, "This field is required")'
+  for (const c of cs)
+    s += `.refine((v) => v === undefined || (${c.expr("v")}), ${JSON.stringify(
+      c.message
+    )})`
+  return s
+}
+
+/** The live default value for a date field (Date objects, for the preview). */
+export function dateDefaultLive(field: DateField): unknown {
+  const dv = field.defaultValue
+  if (field.mode === "range") {
+    if (dv && typeof dv === "object" && !Array.isArray(dv)) {
+      const r = dv as DateRangeValue
+      const from = r.from ? parseISO(r.from) : undefined
+      const to = r.to ? parseISO(r.to) : undefined
+      if (from || to) return { from, to }
+    }
+    return undefined
+  }
+  return typeof dv === "string" && dv ? parseISO(dv) : undefined
+}
+
+/** Emits the default-value literal for a date field (mirror of the live default). */
+export function dateDefaultString(field: DateField): string {
+  const dv = field.defaultValue
+  if (field.mode === "range") {
+    if (dv && typeof dv === "object" && !Array.isArray(dv)) {
+      const r = dv as DateRangeValue
+      const parts: string[] = []
+      if (r.from) parts.push(`from: parseISO(${JSON.stringify(r.from)})`)
+      if (r.to) parts.push(`to: parseISO(${JSON.stringify(r.to)})`)
+      if (parts.length) return `{ ${parts.join(", ")} }`
+    }
+    return "undefined"
+  }
+  return typeof dv === "string" && dv
+    ? `parseISO(${JSON.stringify(dv)})`
+    : "undefined"
+}
+
+/** The date-fns named imports a set of fields needs in generated code. */
+export function dateFnsImportsFor(fields: FormField[]): string[] {
+  const dates = fields.filter((f): f is DateField => f.type === "date")
+  if (dates.length === 0) return []
+  const names = new Set<string>(["format"]) // always used to render the trigger
+  for (const f of dates) {
+    if (f.minDate || f.maxDate || f.defaultValue !== undefined)
+      names.add("parseISO")
+    if (f.disablePastDates) names.add("startOfToday")
+    if (f.disableWeekends) names.add("isWeekend")
+  }
+  return [...names].sort()
+}
+
+/** The react-day-picker `disabled` matcher source expressions for a date field. */
+export function dateMatcherExprs(field: DateField): string[] {
+  const m: string[] = []
+  if (field.minDate)
+    m.push(`{ before: parseISO(${JSON.stringify(field.minDate)}) }`)
+  if (field.maxDate)
+    m.push(`{ after: parseISO(${JSON.stringify(field.maxDate)}) }`)
+  if (field.disablePastDates) m.push("{ before: startOfToday() }")
+  if (field.disableWeekends) m.push("(date) => isWeekend(date)")
+  return m
 }

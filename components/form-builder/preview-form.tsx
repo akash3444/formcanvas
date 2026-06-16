@@ -143,8 +143,8 @@ function TanstackFormPreview({
   const form = useTanstackForm({
     defaultValues: buildDefaultValues(fields) as z.infer<typeof schema>,
     validators: {
+      onChange: schema,
       onSubmit: schema,
-      onBlur: schema,
     },
     onSubmit: ({ value }) => submittedToast(value),
   })

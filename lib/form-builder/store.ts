@@ -49,6 +49,7 @@ const defaultFieldNames: Record<FieldType, string> = {
   "checkbox-group": "Checkbox Group",
   slider: "Slider",
   combobox: "Combobox",
+  date: "Date",
 }
 
 function createDefaultField(type: FieldType): FormField {
@@ -104,6 +105,16 @@ function createDefaultField(type: FieldType): FormField {
         searchPlaceholder: "Search...",
         emptyText: "No results found.",
         clearable: false,
+      }
+    case "date":
+      return {
+        ...base,
+        type: "date",
+        placeholder: "Pick a date",
+        mode: "single",
+        captionLayout: "label",
+        disablePastDates: false,
+        disableWeekends: false,
       }
   }
 }

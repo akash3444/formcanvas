@@ -3,6 +3,7 @@ import type {
   CheckboxGroupField,
   ComboboxField,
   ComboboxDisplayStyle,
+  DateField,
   DescriptionPosition,
   FieldOption,
   FormField,
@@ -99,6 +100,20 @@ function combobox(name: string, over: Partial<ComboboxField> = {}): ComboboxFiel
     searchPlaceholder: "",
     emptyText: "",
     clearable: false,
+    ...baseDefaults,
+    ...over,
+  }
+}
+function date(name: string, over: Partial<DateField> = {}): DateField {
+  return {
+    id: name,
+    type: "date",
+    label: name,
+    name,
+    mode: "single",
+    captionLayout: "label",
+    disablePastDates: false,
+    disableWeekends: false,
     ...baseDefaults,
     ...over,
   }
@@ -254,6 +269,24 @@ one("combobox-multiple-required", combobox("value", { multiple: true, displaySty
 one("combobox-single-default", combobox("value", { multiple: false, displayStyle: "trigger", defaultValue: "two" }))
 one("combobox-multiple-default", combobox("value", { multiple: true, displayStyle: "input", defaultValue: ["one", "two"] }))
 one("combobox-custom-text", combobox("value", { multiple: false, displayStyle: "input", searchPlaceholder: "Type to filter <fast>", emptyText: "Nothing & nada {0}" }))
+
+// Date: single/range × required (drives the `z.date()` vs `z.object({from,to})`
+// schema branch and the Date-vs-DateRange binding), the matcher/disabled paths
+// (min/max/past/weekends), the caption-layout prop, and configured defaults
+// (which emit `parseISO(...)` and pull in the date-fns import).
+for (const mode of ["single", "range"] as const)
+  for (const r of REQ)
+    one(`date-${mode}-${r.tag}`, date("value", { mode, required: r.required }))
+one("date-single-bounds", date("value", { minDate: "2026-01-01", maxDate: "2026-12-31" }))
+one("date-single-no-past", date("value", { disablePastDates: true }))
+one("date-single-no-weekends", date("value", { disableWeekends: true }))
+one("date-single-all-rules", date("value", { required: true, minDate: "2026-01-01", maxDate: "2026-12-31", disablePastDates: true, disableWeekends: true }))
+one("date-single-dropdown", date("value", { captionLayout: "dropdown", minDate: "2020-01-01", maxDate: "2030-12-31" }))
+one("date-single-default", date("value", { defaultValue: "2026-06-16" }))
+one("date-range-all-rules", date("value", { mode: "range", required: true, minDate: "2026-01-01", maxDate: "2026-12-31", disableWeekends: true }))
+one("date-range-default", date("value", { mode: "range", defaultValue: { from: "2026-06-01", to: "2026-06-16" } }))
+for (const d of DESC)
+  one(`date-desc-${d.tag}`, date("value", { description: d.description, descriptionPosition: d.descriptionPosition }))
 
 // Empty label → codegen falls back to "Field".
 one("empty-label", input("value", { label: "" }))

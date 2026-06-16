@@ -12,6 +12,7 @@ export type FieldType =
   | "checkbox-group"
   | "slider"
   | "combobox"
+  | "date"
 
 export type InputType = "text" | "email" | "url" | "tel" | "number"
 
@@ -19,6 +20,16 @@ export interface FieldOption {
   id: string
   label: string
   value: string
+}
+
+/**
+ * A configured date-range value, stored as ISO `yyyy-MM-dd` strings so it stays
+ * JSON-serializable in the persisted builder state. The generated form converts
+ * these to `Date` objects at runtime (see the date validation branch).
+ */
+export interface DateRangeValue {
+  from?: string
+  to?: string
 }
 
 interface BaseField {
@@ -35,7 +46,7 @@ interface BaseField {
    * about without losing its configuration. Absent/false means visible.
    */
   hidden?: boolean
-  defaultValue?: string | number | boolean | string[]
+  defaultValue?: string | number | boolean | string[] | DateRangeValue
 }
 
 export interface NumberValidation {
@@ -115,6 +126,23 @@ export interface ComboboxField extends BaseField {
   clearable: boolean
 }
 
+export type DateMode = "single" | "range"
+
+/** Calendar header style: a static label, or month/year dropdowns. */
+export type DateCaptionLayout = "label" | "dropdown"
+
+export interface DateField extends BaseField {
+  type: "date"
+  mode: DateMode
+  captionLayout: DateCaptionLayout
+  /** Inclusive lower bound, ISO `yyyy-MM-dd`. */
+  minDate?: string
+  /** Inclusive upper bound, ISO `yyyy-MM-dd`. */
+  maxDate?: string
+  disablePastDates: boolean
+  disableWeekends: boolean
+}
+
 export type FormField =
   | InputField
   | PasswordField
@@ -126,6 +154,7 @@ export type FormField =
   | CheckboxGroupField
   | SliderField
   | ComboboxField
+  | DateField
 
 /** Field types that carry a user-editable list of options. */
 export type OptionField =

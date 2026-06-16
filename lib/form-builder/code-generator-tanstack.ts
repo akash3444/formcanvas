@@ -8,8 +8,10 @@ import type {
   CheckboxGroupField,
   SliderField,
   ComboboxField,
+  DateField,
 } from "./types"
 import { toPascalCase } from "./utils"
+import { dateMatcherExprs } from "./validation-spec"
 import {
   indent,
   getOptionsConstName,
@@ -19,6 +21,7 @@ import {
   labelText,
   requiredSpan,
   descEl,
+  jsString,
   buildImports,
   buildOptionsSection,
   buildSchemaBlock,
@@ -28,9 +31,11 @@ import {
 /**
  * TanStack Form generator. Shares the Zod schema, options constants, labels,
  * descriptions, and shadcn imports with the React Hook Form generator (via
- * codegen-shared.ts); only the field-binding layer differs. Validation mirrors
- * the reference component: schema validators on submit and blur, with errors
- * gated behind `isTouched && !isValid`.
+ * codegen-shared.ts); only the field-binding layer differs. Validation runs on
+ * change and submit (no onBlur validator) so controls that don't emit a blur —
+ * e.g. picking a date in a Calendar popover — still re-run validation and clear
+ * a prior error; errors stay gated behind `isTouched && !isValid`, so they only
+ * surface once a field is blurred or the form is submitted.
  */
 
 /** Wraps a field's inner JSX in a `<form.Field>` render-prop with touched gating. */
@@ -341,6 +346,52 @@ ${bindings}
   </Combobox>${descEl(field, "below-control")}${error}
 </Field>`
     }
+
+    case "date": {
+      const f = field as DateField
+      const placeholder = jsString(f.placeholder || "Pick a date")
+      const matchers = dateMatcherExprs(f)
+      const disabledLine = matchers.length
+        ? `\n        disabled={[${matchers.join(", ")}]}`
+        : ""
+      const isRange = f.mode === "range"
+      const emptyCheck = isRange ? "field.state.value?.from" : "field.state.value"
+      const selectedExpr = isRange
+        ? "field.state.value as DateRange | undefined"
+        : "field.state.value"
+      const triggerLabel = isRange
+        ? `{field.state.value?.from ? (field.state.value.to ? \`\${format(field.state.value.from, "LLL dd, y")} – \${format(field.state.value.to, "LLL dd, y")}\` : format(field.state.value.from, "LLL dd, y")) : ${placeholder}}`
+        : `{field.state.value ? format(field.state.value, "PPP") : ${placeholder}}`
+      return `<Field data-invalid={isInvalid}>
+  <FieldLabel htmlFor="${f.name}">
+    ${label}${reqSpan}
+  </FieldLabel>${descEl(field, "above-control")}
+  <Popover>
+    <PopoverTrigger
+      render={
+        <Button
+          id="${f.name}"
+          variant="outline"
+          aria-invalid={isInvalid}
+          className={cn("w-full justify-start text-left font-normal", !${emptyCheck} && "text-muted-foreground")}
+        >
+          <CalendarIcon />
+          ${triggerLabel}
+        </Button>
+      }
+    />
+    <PopoverContent className="w-auto p-0" align="start">
+      <Calendar
+        mode="${f.mode}"
+        captionLayout="${f.captionLayout}"
+        selected={${selectedExpr}}
+        onSelect={(value) => field.handleChange(value)}${disabledLine}
+        autoFocus
+      />
+    </PopoverContent>
+  </Popover>${descEl(field, "below-control")}${error}
+</Field>`
+    }
   }
 }
 
@@ -372,8 +423,8 @@ export function ${pascal}Form() {
 ${buildDefaultValueLines(fields)}
     } as ${pascal}FormValues,
     validators: {
+      onChange: ${camel}FormSchema,
       onSubmit: ${camel}FormSchema,
-      onBlur: ${camel}FormSchema,
     },
     onSubmit: ({ value }) => {
       console.log(value)

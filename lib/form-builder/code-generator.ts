@@ -9,8 +9,10 @@ import type {
   CheckboxGroupField,
   SliderField,
   ComboboxField,
+  DateField,
 } from "./types"
 import { toKebabCase, toPascalCase } from "./utils"
+import { dateMatcherExprs } from "./validation-spec"
 import {
   indent,
   getOptionsConstName,
@@ -20,6 +22,7 @@ import {
   labelText,
   requiredSpan,
   descEl,
+  jsString,
   buildImports,
   buildOptionsSection,
   buildSchemaBlock,
@@ -377,6 +380,58 @@ function generateFieldJSX(field: FormField): string {
       >
         ${control}
       </Combobox>
+    )}
+  />${descEl(field, "below-control")}${errorEl}
+</Field>`
+    }
+
+    case "date": {
+      const f = field as DateField
+      const placeholder = jsString(f.placeholder || "Pick a date")
+      const matchers = dateMatcherExprs(f)
+      const disabledLine = matchers.length
+        ? `\n            disabled={[${matchers.join(", ")}]}`
+        : ""
+      const isRange = f.mode === "range"
+      const emptyCheck = isRange ? "field.value?.from" : "field.value"
+      const selectedExpr = isRange
+        ? "field.value as DateRange | undefined"
+        : "field.value"
+      const triggerLabel = isRange
+        ? `{field.value?.from ? (field.value.to ? \`\${format(field.value.from, "LLL dd, y")} – \${format(field.value.to, "LLL dd, y")}\` : format(field.value.from, "LLL dd, y")) : ${placeholder}}`
+        : `{field.value ? format(field.value, "PPP") : ${placeholder}}`
+      return `<Field data-invalid={!!form.formState.errors.${f.name}}>
+  <FieldLabel htmlFor="${f.name}">
+    ${label}${reqSpan}
+  </FieldLabel>${descEl(field, "above-control")}
+  <Controller
+    name="${f.name}"
+    control={form.control}
+    render={({ field, fieldState }) => (
+      <Popover>
+        <PopoverTrigger
+          render={
+            <Button
+              id="${f.name}"
+              variant="outline"
+              aria-invalid={fieldState.invalid}
+              className={cn("w-full justify-start text-left font-normal", !${emptyCheck} && "text-muted-foreground")}
+            >
+              <CalendarIcon />
+              ${triggerLabel}
+            </Button>
+          }
+        />
+        <PopoverContent className="w-auto p-0" align="start">
+          <Calendar
+            mode="${f.mode}"
+            captionLayout="${f.captionLayout}"
+            selected={${selectedExpr}}
+            onSelect={field.onChange}${disabledLine}
+            autoFocus
+          />
+        </PopoverContent>
+      </Popover>
     )}
   />${descEl(field, "below-control")}${errorEl}
 </Field>`

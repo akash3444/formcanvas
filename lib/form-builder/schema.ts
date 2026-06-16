@@ -4,6 +4,8 @@ import {
   fieldSchemaSpec,
   applySpec,
   defaultValueFor,
+  dateLiveSchema,
+  dateDefaultLive,
 } from "./validation-spec"
 
 /**
@@ -15,7 +17,10 @@ import {
 export function buildSchema(fields: FormField[]) {
   const shape: Record<string, z.ZodTypeAny> = {}
   for (const field of fields) {
-    shape[field.name] = applySpec(fieldSchemaSpec(field))
+    shape[field.name] =
+      field.type === "date"
+        ? dateLiveSchema(field)
+        : applySpec(fieldSchemaSpec(field))
   }
   return z.object(shape)
 }
@@ -28,7 +33,8 @@ export function buildSchema(fields: FormField[]) {
 export function buildDefaultValues(fields: FormField[]): Record<string, unknown> {
   const defaults: Record<string, unknown> = {}
   for (const field of fields) {
-    defaults[field.name] = defaultValueFor(field)
+    defaults[field.name] =
+      field.type === "date" ? dateDefaultLive(field) : defaultValueFor(field)
   }
   return defaults
 }

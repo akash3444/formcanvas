@@ -25,6 +25,7 @@ import {
   DefaultValueSection,
   ComboboxSettingsSection,
   SliderRangeSection,
+  DateSettingsSection,
   ValidationSection,
   OptionsSection,
 } from "./field-config-sections"
@@ -206,6 +207,7 @@ export function FieldConfig({ field }: FieldConfigProps) {
 
       <ComboboxSettingsSection field={field} />
       <SliderRangeSection field={field} />
+      <DateSettingsSection field={field} />
       <ValidationSection field={field} />
       <OptionsSection field={field} />
     </div>

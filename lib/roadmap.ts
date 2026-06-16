@@ -21,8 +21,9 @@ export const ROADMAP_ITEMS: RoadmapItem[] = [
   },
   {
     status: "planned",
-    title: "Date & time field",
-    description: "A dedicated date and time picker with min/max range validation.",
+    title: "Time & date-time fields",
+    description:
+      "Build on the date field with a time-of-day picker and a combined date-and-time field.",
   },
   {
     status: "planned",
@@ -50,6 +51,13 @@ export const ROADMAP_ITEMS: RoadmapItem[] = [
   },
   // In progress — currently nothing in progress
   // Shipped — most recent first
+  {
+    status: "shipped",
+    title: "Date picker field",
+    description:
+      "Pick a single date or a range, with min/max bounds and options to disable past dates or weekends.",
+    date: "2026-06-16",
+  },
   {
     status: "shipped",
     title: "Field visibility toggle",

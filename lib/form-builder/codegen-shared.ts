@@ -10,6 +10,9 @@ import {
   serializeSpec,
   defaultValueFor,
   serializeDefault,
+  dateZodString,
+  dateDefaultString,
+  dateFnsImportsFor,
 } from "./validation-spec"
 
 /**
@@ -22,12 +25,16 @@ import {
 
 /** Emits the Zod schema source for a field (mirror of the live schema). */
 export function getZodType(field: FormField): string {
-  return serializeSpec(fieldSchemaSpec(field))
+  return field.type === "date"
+    ? dateZodString(field)
+    : serializeSpec(fieldSchemaSpec(field))
 }
 
 /** Emits the default-value literal for a field (mirror of the live default). */
 export function getDefaultValue(field: FormField): string {
-  return serializeDefault(defaultValueFor(field))
+  return field.type === "date"
+    ? dateDefaultString(field)
+    : serializeDefault(defaultValueFor(field))
 }
 
 export function indent(str: string, spaces: number): string {
@@ -212,6 +219,19 @@ export function buildImports(
     imports.push(
       `import { ${ordered.join(", ")} } from "@/components/ui/combobox"`
     )
+  }
+  if (types.has("date")) {
+    imports.push('import { cn } from "@/lib/utils"')
+    imports.push('import { Calendar } from "@/components/ui/calendar"')
+    imports.push(
+      'import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"'
+    )
+    imports.push('import { CalendarIcon } from "lucide-react"')
+    if (fields.some((f) => f.type === "date" && f.mode === "range"))
+      imports.push('import type { DateRange } from "react-day-picker"')
+    const dateFns = dateFnsImportsFor(fields)
+    if (dateFns.length)
+      imports.push(`import { ${dateFns.join(", ")} } from "date-fns"`)
   }
 
   return imports.join("\n")

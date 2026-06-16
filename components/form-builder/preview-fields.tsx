@@ -10,9 +10,19 @@ import {
   FieldLegend,
   FieldSet,
 } from "@/components/ui/field"
-import type { FormField } from "@/lib/form-builder/types"
+import type { FormField, DateField } from "@/lib/form-builder/types"
 import { Slider } from "@/components/ui/slider"
 import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Calendar } from "@/components/ui/calendar"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { CalendarIcon } from "lucide-react"
+import { format, isWeekend, parseISO, startOfToday } from "date-fns"
+import type { DateRange, Matcher } from "react-day-picker"
 import { PasswordInput } from "@/components/ui/password-input"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -44,6 +54,33 @@ import { cn } from "@/lib/utils"
 // The preview form's value shape is dynamic (one key per field), so the control
 // is typed loosely; individual renderers cast field values as needed.
 type PreviewControl = Control<Record<string, unknown>>
+
+/**
+ * A date field's stored form value can briefly hold the wrong shape — toggling
+ * a field between single and range mode leaves the previous value in the live
+ * form until the next edit. `format()` throws on a non-Date, so the value is
+ * sanitized to the shape the current mode expects before it's rendered.
+ */
+function asDateValue(v: unknown): Date | undefined {
+  return v instanceof Date && !isNaN(v.getTime()) ? v : undefined
+}
+function asRangeValue(v: unknown): DateRange | undefined {
+  if (!v || typeof v !== "object" || v instanceof Date) return undefined
+  const r = v as { from?: unknown; to?: unknown }
+  const from = asDateValue(r.from)
+  const to = asDateValue(r.to)
+  return from || to ? { from, to } : undefined
+}
+
+/** Builds the react-day-picker `disabled` matchers from a date field's rules. */
+function dateDisabledMatchers(field: DateField): Matcher[] {
+  const m: Matcher[] = []
+  if (field.minDate) m.push({ before: parseISO(field.minDate) })
+  if (field.maxDate) m.push({ after: parseISO(field.maxDate) })
+  if (field.disablePastDates) m.push({ before: startOfToday() })
+  if (field.disableWeekends) m.push((date: Date) => isWeekend(date))
+  return m
+}
 
 function FieldWrapper({
   label,
@@ -600,6 +637,96 @@ export function PreviewField({ field, control, error }: PreviewFieldProps) {
                     </ComboboxList>
                   </ComboboxContent>
                 </Combobox>
+              )
+            }}
+          />
+        </FieldWrapper>
+      )
+    }
+
+    case "date": {
+      const disabled = dateDisabledMatchers(field)
+      const placeholder = field.placeholder || "Pick a date"
+      return (
+        <FieldWrapper
+          label={field.label}
+          required={field.required}
+          description={field.description}
+          descriptionPosition={field.descriptionPosition}
+          error={error}
+          htmlFor={field.name}
+        >
+          <Controller
+            name={field.name}
+            control={control}
+            render={({ field: f, fieldState }) => {
+              if (field.mode === "range") {
+                const value = asRangeValue(f.value)
+                return (
+                  <Popover>
+                    <PopoverTrigger
+                      render={
+                        <Button
+                          id={field.name}
+                          variant="outline"
+                          aria-invalid={fieldState.invalid}
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !value?.from && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon />
+                          {value?.from
+                            ? value.to
+                              ? `${format(value.from, "LLL dd, y")} – ${format(value.to, "LLL dd, y")}`
+                              : format(value.from, "LLL dd, y")
+                            : placeholder}
+                        </Button>
+                      }
+                    />
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="range"
+                        captionLayout={field.captionLayout}
+                        selected={value}
+                        onSelect={(range) => f.onChange(range)}
+                        disabled={disabled}
+                        autoFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                )
+              }
+              const value = asDateValue(f.value)
+              return (
+                <Popover>
+                  <PopoverTrigger
+                    render={
+                      <Button
+                        id={field.name}
+                        variant="outline"
+                        aria-invalid={fieldState.invalid}
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !value && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon />
+                        {value ? format(value, "PPP") : placeholder}
+                      </Button>
+                    }
+                  />
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      captionLayout={field.captionLayout}
+                      selected={value}
+                      onSelect={(date) => f.onChange(date)}
+                      disabled={disabled}
+                      autoFocus
+                    />
+                  </PopoverContent>
+                </Popover>
               )
             }}
           />

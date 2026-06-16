@@ -19,10 +19,11 @@ import type {
   FormField,
   FieldOption,
   ComboboxDisplayStyle,
+  DateMode,
+  DateRangeValue,
   NumberValidation,
   StringValidation,
 } from "@/lib/form-builder/types"
-import { cn } from "@/lib/utils"
 import { useFormBuilderStore } from "@/lib/form-builder/store"
 import { coerceComboboxDefault, isOptionField } from "@/lib/form-builder/utils"
 import { Input } from "@/components/ui/input"
@@ -287,6 +288,67 @@ export function DefaultValueSection({ field }: { field: FormField }) {
             </>
           )
         })()}
+
+      {/* Date: native date input (single) */}
+      {field.type === "date" && field.mode === "single" && (
+        <Input
+          type="date"
+          value={(field.defaultValue as string | undefined) ?? ""}
+          min={field.minDate}
+          max={field.maxDate}
+          onChange={(e) =>
+            updateField(field.id, {
+              defaultValue: e.target.value === "" ? undefined : e.target.value,
+            })
+          }
+          className="h-7 text-xs"
+        />
+      )}
+
+      {/* Date: from/to native date inputs (range) */}
+      {field.type === "date" &&
+        field.mode === "range" &&
+        (() => {
+          const r = (field.defaultValue as DateRangeValue | undefined) ?? {}
+          const setRange = (patch: Partial<DateRangeValue>) => {
+            const next: DateRangeValue = {}
+            const from = patch.from !== undefined ? patch.from : r.from
+            const to = patch.to !== undefined ? patch.to : r.to
+            if (from) next.from = from
+            if (to) next.to = to
+            updateField(field.id, {
+              defaultValue: next.from || next.to ? next : undefined,
+            })
+          }
+          return (
+            <div className="flex gap-2">
+              <div className="flex flex-1 flex-col gap-1">
+                <label className="text-[11px] text-muted-foreground">From</label>
+                <Input
+                  type="date"
+                  value={r.from ?? ""}
+                  min={field.minDate}
+                  max={r.to ?? field.maxDate}
+                  onChange={(e) =>
+                    setRange({ from: e.target.value || undefined })
+                  }
+                  className="h-7 text-xs"
+                />
+              </div>
+              <div className="flex flex-1 flex-col gap-1">
+                <label className="text-[11px] text-muted-foreground">To</label>
+                <Input
+                  type="date"
+                  value={r.to ?? ""}
+                  min={r.from ?? field.minDate}
+                  max={field.maxDate}
+                  onChange={(e) => setRange({ to: e.target.value || undefined })}
+                  className="h-7 text-xs"
+                />
+              </div>
+            </div>
+          )
+        })()}
     </div>
   )
 }
@@ -431,6 +493,105 @@ export function SliderRangeSection({ field }: { field: FormField }) {
               const v = Number(e.target.value)
               updateField(field.id, { step: isNaN(v) || v <= 0 ? 1 : v })
             }}
+            className="h-7 text-xs"
+          />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Date settings (mode, caption, bounds, disabled rules)
+// ---------------------------------------------------------------------------
+
+export function DateSettingsSection({ field }: { field: FormField }) {
+  const updateField = useFormBuilderStore((s) => s.updateField)
+  if (field.type !== "date") return null
+
+  return (
+    <div className="space-y-2.5">
+      <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+        Date
+      </p>
+
+      <LabeledRow label="Mode">
+        <Tabs
+          value={field.mode}
+          onValueChange={(v) =>
+            // Switching mode flips the value shape (string <-> { from, to }),
+            // so drop any configured default to avoid holding the wrong shape.
+            updateField(field.id, {
+              mode: v as DateMode,
+              defaultValue: undefined,
+            })
+          }
+        >
+          <TabsList className="h-7 w-full">
+            <TabsTrigger value="single" className="text-[13px]">
+              Single
+            </TabsTrigger>
+            <TabsTrigger value="range" className="text-[13px]">
+              Range
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </LabeledRow>
+
+      <SwitchRow
+        label="Month & year dropdowns"
+        checked={field.captionLayout === "dropdown"}
+        onChange={(v) =>
+          updateField(field.id, { captionLayout: v ? "dropdown" : "label" })
+        }
+      />
+
+      <SwitchRow
+        label="Disable past dates"
+        checked={field.disablePastDates}
+        onChange={(v) => updateField(field.id, { disablePastDates: v })}
+      />
+
+      <SwitchRow
+        label="Disable weekends"
+        checked={field.disableWeekends}
+        onChange={(v) => updateField(field.id, { disableWeekends: v })}
+      />
+
+      <div className="flex gap-2">
+        <div className="flex flex-1 flex-col gap-1">
+          <label
+            htmlFor={`min-date-${field.id}`}
+            className="text-[11px] text-muted-foreground"
+          >
+            Min date
+          </label>
+          <Input
+            id={`min-date-${field.id}`}
+            type="date"
+            value={field.minDate ?? ""}
+            max={field.maxDate}
+            onChange={(e) =>
+              updateField(field.id, { minDate: e.target.value || undefined })
+            }
+            className="h-7 text-xs"
+          />
+        </div>
+        <div className="flex flex-1 flex-col gap-1">
+          <label
+            htmlFor={`max-date-${field.id}`}
+            className="text-[11px] text-muted-foreground"
+          >
+            Max date
+          </label>
+          <Input
+            id={`max-date-${field.id}`}
+            type="date"
+            value={field.maxDate ?? ""}
+            min={field.minDate}
+            onChange={(e) =>
+              updateField(field.id, { maxDate: e.target.value || undefined })
+            }
             className="h-7 text-xs"
           />
         </div>

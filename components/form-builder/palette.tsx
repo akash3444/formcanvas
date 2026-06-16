@@ -52,6 +52,12 @@ const PALETTE_CATEGORIES: PaletteCategory[] = [
       { type: "slider", label: "Slider", description: "Range selector" },
     ],
   },
+  {
+    label: "Date & Time",
+    items: [
+      { type: "date", label: "Date", description: "Date or range picker" },
+    ],
+  },
 ]
 
 export function FieldPalette() {

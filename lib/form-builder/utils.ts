@@ -1,4 +1,4 @@
-import type { FormField, OptionField } from "./types"
+import type { FormField, OptionField, DateRangeValue } from "./types"
 
 /** True for field types that carry a user-editable list of options. */
 export function isOptionField(field: FormField): field is OptionField {
@@ -98,7 +98,7 @@ export function uniqueName(desired: string, existing: Set<string>): string {
  * Anything that can't be sensibly carried over becomes `undefined` (no default).
  */
 export function coerceComboboxDefault(
-  defaultValue: string | number | boolean | string[] | undefined,
+  defaultValue: string | number | boolean | string[] | DateRangeValue | undefined,
   toMultiple: boolean
 ): string[] | string | undefined {
   if (toMultiple) {
