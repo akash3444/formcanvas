@@ -49,7 +49,13 @@ export const ROADMAP_ITEMS: RoadmapItem[] = [
     description:
       "Save a form as JSON and load it back later, so you can share and reuse your work across projects.",
   },
-  // In progress — currently nothing in progress
+  // In progress
+  {
+    status: "in-progress",
+    title: "Undo & redo",
+    description:
+      "Step backward and forward through your changes with keyboard shortcuts, so you can experiment freely and recover from mistakes.",
+  },
   // Shipped — most recent first
   {
     status: "shipped",
