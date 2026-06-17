@@ -21,7 +21,6 @@ import {
 import { generateFormCode } from "@/lib/form-builder/code-generator"
 import { useFormBuilderStore } from "@/lib/form-builder/store"
 import type { FormLibrary } from "@/lib/form-builder/types"
-import { cn } from "@/lib/utils"
 import { CodeBlock } from "./code-block"
 import { CopyButton } from "./copy-button"
 import { PreviewForm } from "./preview-form"
@@ -87,7 +86,7 @@ export function FormPreview() {
           posthog.capture("code_viewed", { form_library: formLibrary })
         }
       }}
-      className="flex h-full flex-col overflow-hidden"
+      className="flex h-full flex-col gap-0 overflow-hidden"
     >
       <div className="flex shrink-0 items-center justify-between border-b bg-sidebar px-4 py-2">
         <TabsList>
@@ -168,22 +167,24 @@ export function FormPreview() {
         className="m-0 flex flex-1 flex-col overflow-hidden"
       >
         {files.length > 1 && (
-          <div className="flex shrink-0 items-center gap-1 border-b bg-sidebar px-2 py-1.5">
-            {files.map((file) => (
-              <button
-                key={file.filename}
-                type="button"
-                onClick={() => setActiveFilename(file.filename)}
-                className={cn(
-                  "rounded-md px-2.5 py-1 font-mono text-xs transition-colors",
-                  file.filename === activeFile.filename
-                    ? "bg-background text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
+          <div className="shrink-0 border-b bg-sidebar px-2 py-1.5">
+            <Tabs value={activeFile.filename} onValueChange={setActiveFilename}>
+              <TabsList
+                variant="pill"
+                size="sm"
+                className="w-full justify-start"
               >
-                {file.filename}
-              </button>
-            ))}
+                {files.map((file) => (
+                  <TabsTrigger
+                    key={file.filename}
+                    value={file.filename}
+                    className="font-mono"
+                  >
+                    {file.filename}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
           </div>
         )}
         <div className="relative flex-1 overflow-hidden">
