@@ -116,7 +116,11 @@ export function FieldItem({ field, isSelected }: FieldItemProps) {
               {isHidden ? <EyeOffIcon /> : <EyeIcon />}
             </TooltipTrigger>
             <TooltipContent>
-              <p>{isHidden ? "Show in preview & code" : "Hide from preview & code"}</p>
+              <p>
+                {isHidden
+                  ? "Show in preview & code"
+                  : "Hide from preview & code"}
+              </p>
             </TooltipContent>
           </Tooltip>
           <Tooltip>
@@ -139,13 +143,19 @@ export function FieldItem({ field, isSelected }: FieldItemProps) {
               <p>Remove field</p>
             </TooltipContent>
           </Tooltip>
-          <ChevronDownIcon
-            aria-hidden="true"
-            className={cn(
-              "size-4 text-muted-foreground transition-transform",
-              isSelected && "rotate-180"
-            )}
-          />
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-xs"
+            onClick={() => selectField(isSelected ? null : field.id)}
+            aria-expanded={isSelected}
+            aria-label={isSelected ? "Collapse field" : "Expand field"}
+            className="hit-area-x-0.75 hit-area-y-2 text-muted-foreground"
+          >
+            <ChevronDownIcon
+              className={cn("transition-transform", isSelected && "rotate-180")}
+            />
+          </Button>
         </div>
       </div>
 
