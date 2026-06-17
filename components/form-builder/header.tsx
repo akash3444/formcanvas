@@ -35,6 +35,7 @@ export function BuilderHeader() {
           size="sm"
           render={<Link href="/" />}
           className="hit-area-y-3.5 hit-area-r-2 -ms-5"
+          nativeButton={false}
         >
           <ArrowLeftIcon />
           Back
