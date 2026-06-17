@@ -1,8 +1,9 @@
 "use client"
 
 import posthog from "posthog-js"
-import { useMemo, useState } from "react"
+import { useMemo, useState, type SVGProps } from "react"
 import { Code2, Eye, RotateCcwIcon } from "lucide-react"
+import { ReactHookForm, TanStack } from "@/components/icons"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import {
@@ -28,22 +29,26 @@ import { PreviewForm } from "./preview-form"
 const FORM_LIBRARY_OPTIONS: {
   label: string
   value: FormLibrary
-  icon: string
+  icon: (props: SVGProps<SVGSVGElement>) => React.ReactElement
 }[] = [
   {
     label: "React Hook Form",
     value: "react-hook-form",
-    icon: "/images/rhf-logo.svg",
+    icon: ReactHookForm,
   },
   {
     label: "TanStack Form",
     value: "tanstack-form",
-    icon: "/images/tanstack-logo.png",
+    icon: TanStack,
   },
 ]
 
-function LibraryLogo({ src, alt }: { src: string; alt: string }) {
-  return <img src={src} alt={alt} className="size-4 shrink-0 object-contain" />
+function LibraryLogo({
+  icon: Icon,
+}: {
+  icon: (props: SVGProps<SVGSVGElement>) => React.ReactElement
+}) {
+  return <Icon aria-hidden className="size-4 shrink-0 object-contain" />
 }
 
 export function FormPreview() {
@@ -133,15 +138,13 @@ export function FormPreview() {
             items={FORM_LIBRARY_OPTIONS}
           >
             <SelectTrigger size="sm" className="w-46">
-              {currentLibrary && (
-                <LibraryLogo src={currentLibrary.icon} alt="" />
-              )}
+              {currentLibrary && <LibraryLogo icon={currentLibrary.icon} />}
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               {FORM_LIBRARY_OPTIONS.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
-                  <LibraryLogo src={option.icon} alt="" />
+                  <LibraryLogo icon={option.icon} />
                   {option.label}
                 </SelectItem>
               ))}

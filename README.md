@@ -4,6 +4,8 @@ A visual form builder that generates production-ready React Hook Form + Zod code
 
 Drag fields onto a canvas, configure their labels, validation, and layout, then copy clean, type-safe code you own — with no runtime dependency on FormCanvas.
 
+![FormCanvas — build forms visually and ship production code](public/images/formcanvas-preview.png)
+
 ## Features
 
 - Visual drag-and-drop form building
