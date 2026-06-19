@@ -576,7 +576,7 @@ export function PreviewField({ field, control, error }: PreviewFieldProps) {
                       </ComboboxChips>
                       <ComboboxContent>
                         <ComboboxEmpty>{emptyText}</ComboboxEmpty>
-                      {comboList}
+                        {comboList}
                       </ComboboxContent>
                     </Combobox>
                   )
@@ -669,7 +669,7 @@ export function PreviewField({ field, control, error }: PreviewFieldProps) {
                   />
                   <ComboboxContent>
                     <ComboboxEmpty>{emptyText}</ComboboxEmpty>
-                      {comboList}
+                    {comboList}
                   </ComboboxContent>
                 </Combobox>
               )
