@@ -22,7 +22,7 @@ import { CSS } from "@dnd-kit/utilities"
 import { GripVerticalIcon, PlusIcon, Trash2Icon } from "lucide-react"
 import type { FieldOption, GroupableField } from "@/lib/form-builder/types"
 import { useFormBuilderStore } from "@/lib/form-builder/store"
-import { groupsOf } from "@/lib/form-builder/utils"
+import { groupsOf, slugify } from "@/lib/form-builder/utils"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import {
@@ -37,14 +37,6 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { cn } from "@/lib/utils"
-
-/** Slug a label into a URL-safe value, matching the flat options editor. */
-function slugify(label: string): string {
-  return label
-    .toLowerCase()
-    .replace(/\s+/g, "-")
-    .replace(/[^a-z0-9-]/g, "")
-}
 
 /** Label + value inputs and a delete button — shared by every option row. */
 function OptionInputs({

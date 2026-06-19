@@ -34,6 +34,7 @@ import {
   isGroupableField,
   groupsOf,
   partitionByGroup,
+  slugify,
 } from "@/lib/form-builder/utils"
 import { GroupedOptionsEditor } from "./grouped-options-editor"
 import { Input } from "@/components/ui/input"
@@ -100,15 +101,13 @@ function MultiSelectCombobox({
   options: FieldOption[]
   value: string[]
   onChange: (v: string[]) => void
-  /** When present, options are shown under these group headings. */
   groups?: { id: string; label: string; items: FieldOption[] }[]
 }) {
   const grouped = !!groups && groups.length > 0
-  const labelFor = (v: string) =>
+  const getLabelFromValue = (v: string) =>
     options.find((o) => o.value === v)?.label ?? v
 
-  // base-ui needs grouped value-strings to keep grouping; flat is just values.
-  const items = grouped
+  const items: string[] | { label: string; items: string[] }[] = grouped
     ? groups!.map((g) => ({ label: g.label, items: g.items.map((o) => o.value) }))
     : options.map((o) => o.value)
 
@@ -116,15 +115,15 @@ function MultiSelectCombobox({
     value.length === 0
       ? "No default"
       : value.length === 1
-        ? labelFor(value[0])
+        ? getLabelFromValue(value[0])
         : `${value.length} selected`
 
   return (
     <Combobox
       multiple
-      items={items as never}
-      value={value as never}
-      onValueChange={onChange as never}
+      items={items}
+      value={value}
+      onValueChange={onChange}
       disabled={options.length === 0}
     >
       <ComboboxTrigger className="flex h-8 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-1 text-[13px] data-disabled:cursor-not-allowed data-disabled:opacity-50">
@@ -135,8 +134,7 @@ function MultiSelectCombobox({
         <ComboboxEmpty>No options found.</ComboboxEmpty>
         <ComboboxList>
           {grouped
-            ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              (group: any, index: number) => (
+            ? (group: { label: string; items: string[] }, index: number) => (
                 <ComboboxGroup key={index} items={group.items}>
                   {group.label ? (
                     <ComboboxLabel>{group.label}</ComboboxLabel>
@@ -144,7 +142,7 @@ function MultiSelectCombobox({
                   <ComboboxCollection>
                     {(item: string) => (
                       <ComboboxItem key={item} value={item}>
-                        {labelFor(item)}
+                        {getLabelFromValue(item)}
                       </ComboboxItem>
                     )}
                   </ComboboxCollection>
@@ -152,7 +150,7 @@ function MultiSelectCombobox({
               )
             : (item: string) => (
                 <ComboboxItem key={item} value={item}>
-                  {labelFor(item)}
+                  {getLabelFromValue(item)}
                 </ComboboxItem>
               )}
         </ComboboxList>
@@ -825,10 +823,7 @@ export function OptionsSection({ field }: { field: FormField }) {
               onChange={(e) =>
                 updateOption(field.id, option.id, {
                   label: e.target.value,
-                  value: e.target.value
-                    .toLowerCase()
-                    .replace(/\s+/g, "-")
-                    .replace(/[^a-z0-9-]/g, ""),
+                  value: slugify(e.target.value),
                 })
               }
               placeholder="Option label"
