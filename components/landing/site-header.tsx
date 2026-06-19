@@ -1,6 +1,9 @@
 import Link from "next/link"
 
+import { repoUrl } from "@/lib/site"
+import { GitHub } from "@/components/icons"
 import { Logo } from "@/components/logo"
+import { Button } from "@/components/ui/button"
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -39,6 +42,17 @@ export function SiteHeader() {
         </NavigationMenu>
 
         <div className="flex items-center gap-1.5">
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            aria-label="View source on GitHub"
+            nativeButton={false}
+            render={
+              <a href={repoUrl} target="_blank" rel="noreferrer noopener" />
+            }
+          >
+            <GitHub />
+          </Button>
           <ThemeToggle />
           <CtaButton location="header" size="sm" label="Open builder" />
         </div>

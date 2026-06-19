@@ -3,7 +3,9 @@
 import Link from "next/link"
 import posthog from "posthog-js"
 import { ArrowLeftIcon, Trash2Icon } from "lucide-react"
+import { repoUrl } from "@/lib/site"
 import { useFormBuilderStore } from "@/lib/form-builder/store"
+import { GitHub } from "@/components/icons"
 import { Logo } from "@/components/logo"
 import { Button } from "@/components/ui/button"
 import {
@@ -56,44 +58,69 @@ export function BuilderHeader() {
         </Link>
       </div>
 
-      {hasFields && (
-        <AlertDialog>
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <AlertDialogTrigger render={<Button variant="destructive" />} />
-              }
-            >
-              <Trash2Icon />
-              Clear form
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Remove all fields and reset settings</p>
-            </TooltipContent>
-          </Tooltip>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Clear form?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This will remove all fields and reset all settings. This action
-                cannot be undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                variant="destructive"
-                onClick={() => {
-                  posthog.capture("form_cleared")
-                  clearForm()
-                }}
+      <div className="flex items-center gap-1.5">
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                aria-label="View source on GitHub"
+                nativeButton={false}
+                render={
+                  <a href={repoUrl} target="_blank" rel="noreferrer noopener" />
+                }
+              />
+            }
+          >
+            <GitHub />
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>View source on GitHub</p>
+          </TooltipContent>
+        </Tooltip>
+
+        {hasFields && (
+          <AlertDialog>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <AlertDialogTrigger
+                    render={<Button variant="destructive" />}
+                  />
+                }
               >
+                <Trash2Icon />
                 Clear form
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      )}
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Remove all fields and reset settings</p>
+              </TooltipContent>
+            </Tooltip>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Clear form?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will remove all fields and reset all settings. This
+                  action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  variant="destructive"
+                  onClick={() => {
+                    posthog.capture("form_cleared")
+                    clearForm()
+                  }}
+                >
+                  Clear form
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
+      </div>
     </header>
   )
 }

@@ -6,3 +6,5 @@ function resolveSiteUrl(): string {
 }
 
 export const siteUrl = resolveSiteUrl()
+
+export const repoUrl = "https://github.com/akash3444/formcanvas"
