@@ -264,7 +264,8 @@ export function TanstackPreviewField({ field, api }: TanstackPreviewFieldProps) 
         </Field>
       )
 
-    case "select":
+    case "select": {
+      const selectGroups = isGrouped(field) ? partitionByGroup(field) : null
       return (
         <FieldWrapper
           label={field.label}
@@ -278,7 +279,7 @@ export function TanstackPreviewField({ field, api }: TanstackPreviewFieldProps) 
           <Select
             value={String(api.state.value ?? "")}
             onValueChange={api.handleChange}
-            items={isGrouped(field) ? partitionByGroup(field) : field.options}
+            items={selectGroups ?? field.options}
           >
             <SelectTrigger
               id={field.name}
@@ -290,8 +291,8 @@ export function TanstackPreviewField({ field, api }: TanstackPreviewFieldProps) 
               />
             </SelectTrigger>
             <SelectContent>
-              {isGrouped(field)
-                ? partitionByGroup(field).map((group, i) => (
+              {selectGroups
+                ? selectGroups.map((group, i) => (
                     <SelectGroup key={group.id}>
                       {i > 0 ? <SelectSeparator /> : null}
                       {group.label ? (
@@ -313,6 +314,7 @@ export function TanstackPreviewField({ field, api }: TanstackPreviewFieldProps) 
           </Select>
         </FieldWrapper>
       )
+    }
 
     case "radio-group":
       return (
