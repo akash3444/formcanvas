@@ -462,8 +462,7 @@ export function TanstackPreviewField({ field, api }: TanstackPreviewFieldProps) 
         : opts.map((o) => o.value)
       const comboList = grouped ? (
         <ComboboxList>
-          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-          {(group: any, index: number) => (
+          {(group: { label: string; items: string[] }, index: number) => (
             <ComboboxGroup key={index} items={group.items}>
               {index > 0 ? <ComboboxSeparator /> : null}
               {group.label ? <ComboboxLabel>{group.label}</ComboboxLabel> : null}
@@ -496,7 +495,7 @@ export function TanstackPreviewField({ field, api }: TanstackPreviewFieldProps) 
           control = (
             <Combobox
               multiple
-              items={comboItems as never}
+              items={comboItems}
               itemToStringLabel={labelFor}
               value={arr}
               onValueChange={api.handleChange}
@@ -522,7 +521,7 @@ export function TanstackPreviewField({ field, api }: TanstackPreviewFieldProps) 
           control = (
             <Combobox
               multiple
-              items={comboItems as never}
+              items={comboItems}
               itemToStringLabel={labelFor}
               value={arr}
               onValueChange={api.handleChange}
@@ -558,7 +557,7 @@ export function TanstackPreviewField({ field, api }: TanstackPreviewFieldProps) 
         if (field.displayStyle === "trigger") {
           control = (
             <Combobox
-              items={comboItems as never}
+              items={comboItems}
               itemToStringLabel={labelFor}
               value={single || null}
               onValueChange={(v) => api.handleChange(v ?? "")}
@@ -590,7 +589,7 @@ export function TanstackPreviewField({ field, api }: TanstackPreviewFieldProps) 
         } else {
           control = (
             <Combobox
-              items={comboItems as never}
+              items={comboItems}
               itemToStringLabel={labelFor}
               value={single || null}
               onValueChange={(v) => api.handleChange(v ?? "")}

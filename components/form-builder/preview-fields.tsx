@@ -512,8 +512,7 @@ export function PreviewField({ field, control, error }: PreviewFieldProps) {
         : opts.map((o) => o.value)
       const comboList = grouped ? (
         <ComboboxList>
-          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-          {(group: any, index: number) => (
+          {(group: { label: string; items: string[] }, index: number) => (
             <ComboboxGroup key={index} items={group.items}>
               {index > 0 ? <ComboboxSeparator /> : null}
               {group.label ? <ComboboxLabel>{group.label}</ComboboxLabel> : null}
@@ -556,7 +555,7 @@ export function PreviewField({ field, control, error }: PreviewFieldProps) {
                   return (
                     <Combobox
                       multiple
-                      items={comboItems as never}
+                      items={comboItems}
                       itemToStringLabel={labelFor}
                       value={arr}
                       onValueChange={f.onChange}
@@ -585,7 +584,7 @@ export function PreviewField({ field, control, error }: PreviewFieldProps) {
                 return (
                   <Combobox
                     multiple
-                    items={comboItems as never}
+                    items={comboItems}
                     itemToStringLabel={labelFor}
                     value={arr}
                     onValueChange={f.onChange}
@@ -622,7 +621,7 @@ export function PreviewField({ field, control, error }: PreviewFieldProps) {
               if (field.displayStyle === "trigger") {
                 return (
                   <Combobox
-                    items={comboItems as never}
+                    items={comboItems}
                     itemToStringLabel={labelFor}
                     value={single || null}
                     onValueChange={(v) => f.onChange(v ?? "")}
@@ -657,7 +656,7 @@ export function PreviewField({ field, control, error }: PreviewFieldProps) {
 
               return (
                 <Combobox
-                  items={comboItems as never}
+                  items={comboItems}
                   itemToStringLabel={labelFor}
                   value={single || null}
                   onValueChange={(v) => f.onChange(v ?? "")}
