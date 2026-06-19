@@ -427,8 +427,7 @@ export function TanstackPreviewField({ field, api }: TanstackPreviewFieldProps) 
       const triggerClass =
         "flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs"
 
-      // Shared across every display variant below. See ADR 0001 for the
-      // grouped value-string shape base-ui's combobox expects.
+      // Shared across every display variant below.
       const comboItems = comboboxItems(field)
       const comboList = <ComboboxOptions field={field} labelFor={labelFor} />
 

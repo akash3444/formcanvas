@@ -306,8 +306,8 @@ function generateFieldJSX(field: FormField): string {
 
       // When grouped, base-ui needs grouped value-strings (`{ label, items }`
       // where items are the option values) so the committed value stays a
-      // string; labels are resolved against the flattened option list. See ADR
-      // 0001. Ungrouped behaves exactly as before.
+      // string; labels are resolved against the flattened option list.
+      // Ungrouped behaves exactly as before.
       const grouped = isGrouped(f)
       const flatExpr = grouped
         ? `${constName}.flatMap((g) => g.items)`

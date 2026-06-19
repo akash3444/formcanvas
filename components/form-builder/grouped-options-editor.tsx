@@ -265,7 +265,7 @@ function GroupCard({
  * The grouped options editor: bordered group cards with full drag-and-drop —
  * reorder groups, reorder options within a group, and move options across
  * groups. Storage stays flat; this only manipulates the `groups` overlay and
- * each option's `groupId` (see ADR 0001).
+ * each option's `groupId`.
  */
 export function GroupedOptionsEditor({ field }: { field: GroupableField }) {
   const addGroup = useFormBuilderStore((s) => s.addGroup)

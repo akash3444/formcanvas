@@ -61,7 +61,7 @@ export function generateOptionsConst(
 
   // Grouped select/combobox emit the nested `[{ label, items }]` shape. The
   // inner key is `items` (not `options`) because base-ui detects grouping via
-  // `'items' in items[0]`; the label key is ours. See ADR 0001.
+  // `'items' in items[0]`; the label key is ours.
   if (isGroupableField(field) && isGrouped(field)) {
     const partitioned = partitionByGroup(field)
     // A degenerate empty grouped field would emit `[]`, which TS infers as

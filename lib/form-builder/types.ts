@@ -24,8 +24,7 @@ export interface FieldOption {
    * The {@link OptionGroup} this option belongs to, when its field has grouping
    * enabled. Absent on ungrouped fields (and on radio/checkbox-group, which
    * never surface grouping). Options are always stored as a flat list; this id
-   * is the overlay that codegen/preview partition by — see
-   * `docs/adr/0001-option-grouping-flat-storage-nested-output.md`.
+   * is the overlay that codegen/preview partition by.
    */
   groupId?: string
 }

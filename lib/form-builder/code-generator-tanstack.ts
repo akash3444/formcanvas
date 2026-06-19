@@ -276,8 +276,8 @@ ${bindings}
       const searchPlaceholderAttr = escapeJsxAttr(f.searchPlaceholder || "Search...")
       const emptyTextText = escapeJsxText(f.emptyText || "No results found.")
 
-      // See ADR 0001 / the RHF generator: grouped combobox feeds base-ui
-      // grouped value-strings and resolves labels against the flattened list.
+      // Mirrors the RHF generator: grouped combobox feeds base-ui grouped
+      // value-strings and resolves labels against the flattened list.
       const grouped = isGrouped(f)
       const flatExpr = grouped
         ? `${constName}.flatMap((g) => g.items)`

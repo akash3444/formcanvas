@@ -20,7 +20,7 @@ import {
 /**
  * Shared select/combobox option rendering for the live preview. The React Hook
  * Form and TanStack previews differ only in form binding; the grouped-vs-flat
- * option markup is identical, so it lives here. See ADR 0001.
+ * option markup is identical, so it lives here.
  */
 
 /** A group paired with its options, as produced by {@link partitionByGroup}. */
