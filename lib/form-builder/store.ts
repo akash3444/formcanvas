@@ -25,11 +25,15 @@ interface FormBuilderState {
   fields: FormField[]
   selectedFieldId: string | null
   formLibrary: FormLibrary
+  /** Whether the form-level settings section is collapsed. Persisted so the
+      preference survives reloads — set once, collapse, forget. */
+  formSettingsCollapsed: boolean
 }
 
 interface FormBuilderActions {
   setFormName: (name: string) => void
   setSubmitLabel: (label: string) => void
+  setFormSettingsCollapsed: (collapsed: boolean) => void
   setFormLibrary: (formLibrary: FormLibrary) => void
   addField: (type: FieldType) => void
   removeField: (id: string) => void
@@ -146,6 +150,7 @@ const blankState: FormBuilderState = {
   fields: [],
   selectedFieldId: null,
   formLibrary: "react-hook-form",
+  formSettingsCollapsed: false,
 }
 
 // New visitors (no persisted state) start from a populated example rather than
@@ -169,6 +174,8 @@ export const useFormBuilderStore = create<FormBuilderStore>()(
 
       setFormName: (formName) => set({ formName }),
       setSubmitLabel: (submitLabel) => set({ submitLabel }),
+      setFormSettingsCollapsed: (formSettingsCollapsed) =>
+        set({ formSettingsCollapsed }),
       setFormLibrary: (formLibrary) => set({ formLibrary }),
 
       addField: (type) =>
@@ -440,6 +447,7 @@ export const useFormBuilderStore = create<FormBuilderStore>()(
         set((state) => ({
           ...blankState,
           formLibrary: state.formLibrary,
+          formSettingsCollapsed: state.formSettingsCollapsed,
         })),
 
       loadPreset: (preset) =>
