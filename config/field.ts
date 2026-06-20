@@ -41,3 +41,56 @@ export const FIELD_LABELS: Record<FieldType, string> = {
   combobox: "Combobox",
   date: "Date",
 }
+
+export interface PaletteItem {
+  type: FieldType
+  label: string
+  description: string
+}
+
+export interface PaletteCategory {
+  label: string
+  items: PaletteItem[]
+}
+
+export const PALETTE_CATEGORIES: PaletteCategory[] = [
+  {
+    label: "Text",
+    items: [
+      { type: "input", label: "Input", description: "Single-line text" },
+      { type: "password", label: "Password", description: "Masked input" },
+      { type: "textarea", label: "Textarea", description: "Multi-line text" },
+    ],
+  },
+  {
+    label: "Selection",
+    items: [
+      { type: "select", label: "Select", description: "Dropdown picker" },
+      {
+        type: "radio-group",
+        label: "Radio Group",
+        description: "Single choice",
+      },
+      {
+        type: "checkbox-group",
+        label: "Checkbox Group",
+        description: "Multiple choices",
+      },
+      { type: "combobox", label: "Combobox", description: "Searchable picker" },
+    ],
+  },
+  {
+    label: "Toggle & Numeric",
+    items: [
+      { type: "checkbox", label: "Checkbox", description: "Boolean toggle" },
+      { type: "switch", label: "Switch", description: "On/off toggle" },
+      { type: "slider", label: "Slider", description: "Range selector" },
+    ],
+  },
+  {
+    label: "Date & Time",
+    items: [
+      { type: "date", label: "Date", description: "Date or range picker" },
+    ],
+  },
+]
