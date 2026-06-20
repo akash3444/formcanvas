@@ -139,6 +139,7 @@ export function FieldEditor() {
           </Empty>
         ) : (
           <DndContext
+            id="field-editor-dnd"
             sensors={sensors}
             collisionDetection={closestCenter}
             onDragEnd={handleDragEnd}
