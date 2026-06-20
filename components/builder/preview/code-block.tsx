@@ -1,22 +1,17 @@
 "use client"
 
-import { useEffect, useState } from "react"
 import { useTheme } from "next-themes"
-import type { Highlighter } from "shiki"
+import tsx from "@shikijs/langs/tsx"
+import githubDarkDefault from "@shikijs/themes/github-dark-default"
+import githubLight from "@shikijs/themes/github-light"
+import { createHighlighterCoreSync } from "shiki/core"
+import { createJavaScriptRegexEngine } from "shiki/engine/javascript"
 
-const THEMES = ["github-dark-default", "github-light"] as const
-
-// Load Shiki lazily (keeps it out of the initial bundle) and create a single
-// highlighter with only the language and themes we use, reused across renders.
-let highlighterPromise: Promise<Highlighter> | null = null
-function getHighlighter() {
-  if (!highlighterPromise) {
-    highlighterPromise = import("shiki").then((shiki) =>
-      shiki.createHighlighter({ langs: ["tsx"], themes: [...THEMES] })
-    )
-  }
-  return highlighterPromise
-}
+const highlighter = createHighlighterCoreSync({
+  langs: [tsx],
+  themes: [githubDarkDefault, githubLight],
+  engine: createJavaScriptRegexEngine(),
+})
 
 interface CodeBlockProps {
   code: string
@@ -24,23 +19,9 @@ interface CodeBlockProps {
 
 export function CodeBlock({ code }: CodeBlockProps) {
   const { resolvedTheme } = useTheme()
-  const [html, setHtml] = useState("")
-
-  useEffect(() => {
-    let cancelled = false
-
-    const theme =
-      resolvedTheme === "dark" ? "github-dark-default" : "github-light"
-
-    getHighlighter().then((highlighter) => {
-      if (cancelled) return
-      setHtml(highlighter.codeToHtml(code, { lang: "tsx", theme }))
-    })
-
-    return () => {
-      cancelled = true
-    }
-  }, [code, resolvedTheme])
+  const theme =
+    resolvedTheme === "dark" ? "github-dark-default" : "github-light"
+  const html = highlighter.codeToHtml(code, { lang: "tsx", theme })
 
   // Safe: `html` is produced solely by Shiki from `code`, which is generated
   // by our own code-generator. Shiki HTML-escapes every token's text content,

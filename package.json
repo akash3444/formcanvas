@@ -23,6 +23,8 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@hookform/resolvers": "^5.4.0",
+    "@shikijs/langs": "4.2.0",
+    "@shikijs/themes": "4.2.0",
     "@tanstack/react-form": "^1.33.0",
     "@types/mdx": "^2.0.14",
     "class-variance-authority": "^0.7.1",
