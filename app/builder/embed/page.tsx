@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 
-import { BuilderEmbed } from "@/components/form-builder/embed"
+import { BuilderEmbed } from "@/components/builder/embed"
 
 export const metadata: Metadata = {
   title: "Builder preview · FormCanvas",

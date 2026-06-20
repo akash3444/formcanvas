@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 
-import { BuilderHeader } from "@/components/form-builder/header"
-import { BuilderWorkspace } from "@/components/form-builder/workspace"
+import { BuilderHeader } from "@/components/builder/header"
+import { BuilderWorkspace } from "@/components/builder/workspace"
 
 export const metadata: Metadata = {
   title: "Builder · FormCanvas",
