@@ -9,6 +9,11 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty"
 import { Input } from "@/components/ui/input"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useFormBuilderStore } from "@/lib/form-builder/store"
 import {
@@ -25,7 +30,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable"
-import { LayoutTemplateIcon } from "lucide-react"
+import { ChevronDownIcon, LayoutTemplateIcon } from "lucide-react"
 import { FieldItem } from "./field-item"
 import { PresetsPanel } from "./presets-panel"
 import { Button } from "../ui/button"
@@ -37,6 +42,12 @@ export function FieldEditor() {
   const selectedFieldId = useFormBuilderStore((s) => s.selectedFieldId)
   const setFormName = useFormBuilderStore((s) => s.setFormName)
   const setSubmitLabel = useFormBuilderStore((s) => s.setSubmitLabel)
+  const formSettingsCollapsed = useFormBuilderStore(
+    (s) => s.formSettingsCollapsed
+  )
+  const setFormSettingsCollapsed = useFormBuilderStore(
+    (s) => s.setFormSettingsCollapsed
+  )
   const reorderFields = useFormBuilderStore((s) => s.reorderFields)
 
   const [activeTab, setActiveTab] = useState<string>(() =>
@@ -62,39 +73,48 @@ export function FieldEditor() {
   return (
     <div className="flex min-h-0 flex-col overflow-hidden bg-sidebar">
       {/* Form-level settings */}
-      <div className="shrink-0 border-b px-4 py-3">
-        <h2 className="mb-3 text-sm font-semibold">Form Settings</h2>
-        <div className="space-y-2">
-          <div className="grid grid-cols-[80px_1fr] items-center gap-2">
-            <label
-              htmlFor="form-name"
-              className="text-xs font-medium text-muted-foreground"
-            >
-              Form name
-            </label>
-            <Input
-              id="form-name"
-              value={formName}
-              onChange={(e) => setFormName(e.target.value)}
-              placeholder="My Form"
-            />
+      <Collapsible
+        open={!formSettingsCollapsed}
+        onOpenChange={(open) => setFormSettingsCollapsed(!open)}
+        className="shrink-0 border-b"
+      >
+        <CollapsibleTrigger className="group flex h-12 w-full items-center justify-between px-4 text-sm font-semibold">
+          Form Settings
+          <ChevronDownIcon className="size-4 text-muted-foreground transition-transform group-data-[panel-open]:rotate-180" />
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <div className="space-y-2 px-4 pb-3">
+            <div className="grid grid-cols-[80px_1fr] items-center gap-2">
+              <label
+                htmlFor="form-name"
+                className="text-xs font-medium text-muted-foreground"
+              >
+                Form name
+              </label>
+              <Input
+                id="form-name"
+                value={formName}
+                onChange={(e) => setFormName(e.target.value)}
+                placeholder="My Form"
+              />
+            </div>
+            <div className="grid grid-cols-[80px_1fr] items-center gap-2">
+              <label
+                htmlFor="submit-label"
+                className="text-xs font-medium text-muted-foreground"
+              >
+                Submit label
+              </label>
+              <Input
+                id="submit-label"
+                value={submitLabel}
+                onChange={(e) => setSubmitLabel(e.target.value)}
+                placeholder="Submit"
+              />
+            </div>
           </div>
-          <div className="grid grid-cols-[80px_1fr] items-center gap-2">
-            <label
-              htmlFor="submit-label"
-              className="text-xs font-medium text-muted-foreground"
-            >
-              Submit label
-            </label>
-            <Input
-              id="submit-label"
-              value={submitLabel}
-              onChange={(e) => setSubmitLabel(e.target.value)}
-              placeholder="Submit"
-            />
-          </div>
-        </div>
-      </div>
+        </CollapsibleContent>
+      </Collapsible>
 
       {/* Tabs: Fields | Presets */}
       <Tabs
@@ -163,7 +183,6 @@ export function FieldEditor() {
               </SortableContext>
             </DndContext>
           )}
-
         </TabsContent>
 
         <TabsContent
