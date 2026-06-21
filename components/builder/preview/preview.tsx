@@ -3,7 +3,13 @@
 import posthog from "posthog-js"
 import { useMemo, useState, type SVGProps } from "react"
 import { Code2, Eye, RotateCcwIcon } from "lucide-react"
-import { ReactHookForm, TanStack, Zod, Valibot, ArkType } from "@/components/icons"
+import {
+  ReactHookForm,
+  TanStack,
+  Zod,
+  Valibot,
+  ArkType,
+} from "@/components/icons"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import {
@@ -165,7 +171,7 @@ export function FormPreview() {
             }}
             items={SCHEMA_LIBRARY_OPTIONS}
           >
-            <SelectTrigger size="sm" className="w-36">
+            <SelectTrigger size="sm" className="w-30">
               {currentSchema && <LibraryLogo icon={currentSchema.icon} />}
               <SelectValue />
             </SelectTrigger>
