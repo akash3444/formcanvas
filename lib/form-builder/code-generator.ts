@@ -407,7 +407,7 @@ function generateFieldJSX(field: FormField): string {
         </ComboboxContent>`
       }
 
-      const renderArgs = usesFieldState ? "{ field, fieldState }" : "{ field }"
+      const renderArgs = usesFieldState ? "field, fieldState" : "field"
 
       return `<Field data-invalid={!!form.formState.errors.${f.name}}>
   <FieldLabel htmlFor="${f.name}">
@@ -416,7 +416,7 @@ function generateFieldJSX(field: FormField): string {
   <Controller
     name="${f.name}"
     control={form.control}
-    render={({ ${renderArgs.slice(2, -2)} }) => (
+    render={({ ${renderArgs} }) => (
       <Combobox
         ${rootProps}
       >
