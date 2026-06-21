@@ -9,6 +9,7 @@ import {
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
+  navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
 import { CtaButton } from "@/components/landing/cta-button"
 
@@ -33,7 +34,10 @@ export function SiteHeader() {
           <NavigationMenuList className="gap-2">
             {NAV_LINKS.map((link) => (
               <NavigationMenuItem key={link.href}>
-                <NavigationMenuLink render={<Link href={link.href} />}>
+                <NavigationMenuLink
+                  render={<Link href={link.href} />}
+                  className={navigationMenuTriggerStyle()}
+                >
                   {link.label}
                 </NavigationMenuLink>
               </NavigationMenuItem>
