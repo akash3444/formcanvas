@@ -1,6 +1,7 @@
 import type {
   FormField,
   FormLibrary,
+  SchemaLibrary,
   InputField,
   PasswordField,
   TextareaField,
@@ -27,11 +28,11 @@ import {
   comboboxCodegenParts,
   buildImports,
   buildOptionsSection,
-  buildSchemaBlock,
   buildDefaultValueLines,
 } from "./codegen-shared"
 import { collectCompanions, type GeneratedFile } from "./codegen-companions"
 import { generateTanstackFormCode } from "./code-generator-tanstack"
+import { getEmitter } from "./schema-emitters"
 
 function generateFieldJSX(field: FormField): string {
   const label = labelText(field)
@@ -470,19 +471,21 @@ function generateFieldJSX(field: FormField): string {
   }
 }
 
-/** Generates a React Hook Form + Zod form component. */
+/** Generates a React Hook Form component for the given schema library. */
 function generateReactHookFormCode(
   formName: string,
   submitLabel: string,
-  fields: FormField[]
+  fields: FormField[],
+  schemaLibrary: SchemaLibrary
 ): string {
   const pascal = toPascalCase(formName) || "My"
   const camel = pascal.charAt(0).toLowerCase() + pascal.slice(1)
+  const emitter = getEmitter(schemaLibrary)
 
   const imports = buildImports(fields, [
     'import { useForm, Controller } from "react-hook-form"',
-    'import { zodResolver } from "@hookform/resolvers/zod"',
-    'import { z } from "zod"',
+    emitter.rhfResolverImport,
+    ...emitter.imports,
   ])
 
   const fieldJSX = fields
@@ -491,11 +494,11 @@ function generateReactHookFormCode(
 
   return `${imports}
 
-${buildOptionsSection(fields)}${buildSchemaBlock(camel, pascal, fields)}
+${buildOptionsSection(fields)}${emitter.schemaBlock(camel, pascal, fields)}
 
 export function ${pascal}Form() {
   const form = useForm<${pascal}FormValues>({
-    resolver: zodResolver(${camel}FormSchema),
+    resolver: ${emitter.rhfResolver(`${camel}FormSchema`)},
     defaultValues: {
 ${buildDefaultValueLines(fields)}
     },
@@ -518,17 +521,19 @@ ${fieldJSX}
 }
 
 /**
- * Generates the files for the given fields and selected form library: the form
- * component plus any companion component files its field types require (e.g.
- * `password-input.tsx`). Both per-library generators share the Zod schema,
- * options constants, and shadcn imports via codegen-shared.ts. The form file is
- * always first; companions follow in a stable, deduped order.
+ * Generates the files for the given fields, form library, and schema library:
+ * the form component plus any companion component files its field types require
+ * (e.g. `password-input.tsx`). Both per-library generators share the options
+ * constants, defaults, and shadcn imports via codegen-shared.ts and draw the
+ * schema block from the selected Schema Emitter. The form file is always first;
+ * companions follow in a stable, deduped order.
  */
 export function generateFormCode(
   formName: string,
   submitLabel: string,
   fields: FormField[],
-  formLibrary: FormLibrary = "react-hook-form"
+  formLibrary: FormLibrary = "react-hook-form",
+  schemaLibrary: SchemaLibrary = "zod"
 ): GeneratedFile[] {
   if (fields.length === 0) {
     return [
@@ -543,8 +548,8 @@ export function generateFormCode(
   const pascal = toPascalCase(formName) || "My"
   const formCode =
     formLibrary === "tanstack-form"
-      ? generateTanstackFormCode(formName, submitLabel, fields)
-      : generateReactHookFormCode(formName, submitLabel, fields)
+      ? generateTanstackFormCode(formName, submitLabel, fields, schemaLibrary)
+      : generateReactHookFormCode(formName, submitLabel, fields, schemaLibrary)
 
   const formFile: GeneratedFile = {
     filename: `${toKebabCase(pascal)}-form.tsx`,

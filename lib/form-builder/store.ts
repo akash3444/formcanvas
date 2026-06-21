@@ -7,6 +7,7 @@ import type {
   FieldOption,
   OptionGroup,
   FormLibrary,
+  SchemaLibrary,
 } from "./types"
 import { FORM_PRESETS, type FormPreset } from "./presets"
 import {
@@ -25,6 +26,7 @@ interface FormBuilderState {
   fields: FormField[]
   selectedFieldId: string | null
   formLibrary: FormLibrary
+  schemaLibrary: SchemaLibrary
   /** Whether the form-level settings section is collapsed. Persisted so the
       preference survives reloads — set once, collapse, forget. */
   formSettingsCollapsed: boolean
@@ -35,6 +37,7 @@ interface FormBuilderActions {
   setSubmitLabel: (label: string) => void
   setFormSettingsCollapsed: (collapsed: boolean) => void
   setFormLibrary: (formLibrary: FormLibrary) => void
+  setSchemaLibrary: (schemaLibrary: SchemaLibrary) => void
   addField: (type: FieldType) => void
   removeField: (id: string) => void
   toggleFieldVisibility: (id: string) => void
@@ -150,6 +153,7 @@ const blankState: FormBuilderState = {
   fields: [],
   selectedFieldId: null,
   formLibrary: "react-hook-form",
+  schemaLibrary: "zod",
   formSettingsCollapsed: false,
 }
 
@@ -177,6 +181,7 @@ export const useFormBuilderStore = create<FormBuilderStore>()(
       setFormSettingsCollapsed: (formSettingsCollapsed) =>
         set({ formSettingsCollapsed }),
       setFormLibrary: (formLibrary) => set({ formLibrary }),
+      setSchemaLibrary: (schemaLibrary) => set({ schemaLibrary }),
 
       addField: (type) =>
         set((state) => {
@@ -441,12 +446,13 @@ export const useFormBuilderStore = create<FormBuilderStore>()(
           }),
         })),
 
-      // Keep the chosen form library across a clear — it's an output
-      // preference, not form content.
+      // Keep the chosen form/schema libraries across a clear — they're output
+      // preferences, not form content.
       clearForm: () =>
         set((state) => ({
           ...blankState,
           formLibrary: state.formLibrary,
+          schemaLibrary: state.schemaLibrary,
           formSettingsCollapsed: state.formSettingsCollapsed,
         })),
 

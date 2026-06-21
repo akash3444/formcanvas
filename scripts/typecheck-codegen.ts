@@ -24,11 +24,13 @@ import fs from "node:fs"
 import { Project } from "ts-morph"
 import { generateFormCode } from "../lib/form-builder/code-generator"
 import { CODEGEN_FIXTURES } from "../lib/form-builder/__fixtures__/codegen-fixtures"
-import type { FormLibrary } from "../lib/form-builder/types"
+import type { FormLibrary, SchemaLibrary } from "../lib/form-builder/types"
 
 const ROOT = process.cwd()
 const VIRTUAL_DIR = path.join(ROOT, ".codegen-virtual")
 const LIBRARIES: FormLibrary[] = ["react-hook-form", "tanstack-form"]
+// Schema libraries grow one phase at a time as their emitters land.
+const SCHEMA_LIBRARIES: SchemaLibrary[] = ["zod"]
 
 const args = process.argv.slice(2)
 const shouldWrite = args.includes("--write")
@@ -38,6 +40,12 @@ const filter = filterIdx !== -1 ? args[filterIdx + 1] : undefined
 const libSlug: Record<FormLibrary, string> = {
   "react-hook-form": "rhf",
   "tanstack-form": "tanstack",
+}
+
+const schemaSlug: Record<SchemaLibrary, string> = {
+  zod: "zod",
+  valibot: "valibot",
+  arktype: "arktype",
 }
 
 interface GeneratedCase {
@@ -66,20 +74,30 @@ const project = new Project({
 const cases: GeneratedCase[] = []
 for (const fixture of fixtures) {
   for (const lib of LIBRARIES) {
-    // The form file is always first; companion files (e.g. password-input.tsx)
-    // are emitted verbatim from real on-disk components, so the form's imports
-    // of them resolve against the actual project and need no separate check.
-    const [formFile] = generateFormCode(
-      fixture.formName,
-      fixture.submitLabel,
-      fixture.fields,
-      lib
-    )
-    // Anchor virtual files at the repo root so "@/..." imports resolve exactly
-    // as they would in the app. The files stay in memory unless --write is set.
-    const filePath = path.join(VIRTUAL_DIR, `${fixture.name}.${libSlug[lib]}.tsx`)
-    project.createSourceFile(filePath, formFile.code, { overwrite: true })
-    cases.push({ id: `${fixture.name} [${lib}]`, filePath, code: formFile.code })
+    for (const schema of SCHEMA_LIBRARIES) {
+      // The form file is always first; companion files (e.g. password-input.tsx)
+      // are emitted verbatim from real on-disk components, so the form's imports
+      // of them resolve against the actual project and need no separate check.
+      const [formFile] = generateFormCode(
+        fixture.formName,
+        fixture.submitLabel,
+        fixture.fields,
+        lib,
+        schema
+      )
+      // Anchor virtual files at the repo root so "@/..." imports resolve exactly
+      // as they would in the app. Files stay in memory unless --write is set.
+      const filePath = path.join(
+        VIRTUAL_DIR,
+        `${fixture.name}.${libSlug[lib]}.${schemaSlug[schema]}.tsx`
+      )
+      project.createSourceFile(filePath, formFile.code, { overwrite: true })
+      cases.push({
+        id: `${fixture.name} [${lib} + ${schema}]`,
+        filePath,
+        code: formFile.code,
+      })
+    }
   }
 }
 
@@ -92,7 +110,8 @@ if (shouldWrite) {
 
 console.log(
   `Type-checking ${cases.length} generated modules ` +
-    `(${fixtures.length} fixtures × ${LIBRARIES.length} libraries)...\n`
+    `(${fixtures.length} fixtures × ${LIBRARIES.length} form libs × ` +
+    `${SCHEMA_LIBRARIES.length} schema libs)...\n`
 )
 
 const diagnostics = project.getPreEmitDiagnostics()
