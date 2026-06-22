@@ -7,30 +7,22 @@ import type {
   GroupOrientation,
 } from "./types"
 import {
-  fieldSchemaSpec,
-  serializeSpec,
   defaultValueFor,
   serializeDefault,
-  dateZodString,
   dateDefaultString,
   dateFnsImportsFor,
 } from "./validation-spec"
 import { isGroupableField, isGrouped, partitionByGroup } from "./utils"
 
 /**
- * Library-agnostic code-generation helpers shared between the React Hook Form
- * and TanStack Form generators. Anything here produces identical output
- * regardless of the selected form library — escaping, options constants, the
- * Zod schema/defaults, and the shadcn component imports. Only the field
- * binding layer (Controller vs form.Field) lives in the per-library generators.
+ * Code-generation helpers shared between the React Hook Form and TanStack Form
+ * generators. Anything here produces identical output regardless of the
+ * selected form library AND schema library — escaping, options constants,
+ * defaults, and the shadcn component imports. The schema block itself varies by
+ * schema library and lives in the per-library Schema Emitters (schema-emitters/);
+ * the field binding layer varies by form library and lives in the per-library
+ * generators.
  */
-
-/** Emits the Zod schema source for a field (mirror of the live schema). */
-export function getZodType(field: FormField): string {
-  return field.type === "date"
-    ? dateZodString(field)
-    : serializeSpec(fieldSchemaSpec(field))
-}
 
 /** Emits the default-value literal for a field (mirror of the live default). */
 export function getDefaultValue(field: FormField): string {
@@ -341,27 +333,6 @@ export function buildOptionsSection(fields: FormField[]): string {
   return optionFields.length > 0
     ? optionFields.map(generateOptionsConst).join("\n\n") + "\n\n"
     : ""
-}
-
-/** The Zod schema constant and inferred type alias, shared by both libraries. */
-export function buildSchemaBlock(
-  camel: string,
-  pascal: string,
-  fields: FormField[]
-): string {
-  const schemaFields = fields
-    .map((f) => `  ${f.name}: ${getZodType(f)},`)
-    .join("\n")
-  // The form holds the schema's INPUT type (what the controls produce), which
-  // diverges from the output only when a field narrows on parse — e.g. a
-  // required number is `number | undefined` while editing but `number` after
-  // validation. For every non-narrowing field `z.input` equals `z.infer`, so
-  // this is identical to the inferred type everywhere except those cases.
-  return `const ${camel}FormSchema = z.object({
-${schemaFields}
-})
-
-type ${pascal}FormValues = z.input<typeof ${camel}FormSchema>`
 }
 
 /** The default-value object entries, indented for a `defaultValues: { ... }`. */

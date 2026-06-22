@@ -24,13 +24,13 @@ type SpecField = Exclude<FormField, DateField>
  * no longer drift (error messages, conditions, and ordering are defined once).
  */
 
-type Base =
+export type Base =
   | { kind: "string" }
   | { kind: "number" }
   | { kind: "boolean" }
   | { kind: "array" } // array of strings
 
-type Op =
+export type Op =
   | { op: "email"; message: string }
   | { op: "url"; message: string }
   // min/max apply to string length, number value, or array length depending on
@@ -46,7 +46,7 @@ type Op =
 // undefined`) consistent with what the control actually holds — a plain
 // `z.number()` would infer `number`, which the number input can never guarantee
 // mid-edit and which makes the generated TanStack binding fail to type-check.
-type Tail = "none" | "optional" | "requiredNumber"
+export type Tail = "none" | "optional" | "requiredNumber"
 
 export interface SchemaSpec {
   base: Base
@@ -232,57 +232,6 @@ export function applySpec(spec: SchemaSpec): z.ZodTypeAny {
   return s as unknown as z.ZodTypeAny
 }
 
-function baseString(base: Base): string {
-  switch (base.kind) {
-    case "string":
-      return "z.string()"
-    case "number":
-      return "z.number()"
-    case "boolean":
-      return "z.boolean()"
-    case "array":
-      return "z.array(z.string())"
-  }
-}
-
-/** Emits the equivalent Zod source string for a spec (used by codegen). */
-export function serializeSpec(spec: SchemaSpec): string {
-  let str = baseString(spec.base)
-  for (const op of spec.ops) {
-    switch (op.op) {
-      case "email":
-        str += `.email("${op.message}")`
-        break
-      case "url":
-        str += `.url("${op.message}")`
-        break
-      case "min":
-        str += op.message ? `.min(${op.value}, "${op.message}")` : `.min(${op.value})`
-        break
-      case "max":
-        str += op.message ? `.max(${op.value}, "${op.message}")` : `.max(${op.value})`
-        break
-      case "isTrue":
-        str += `.refine((val) => val === true, "${op.message}")`
-        break
-      case "refineOptionalMin":
-        str += `.refine((v) => v.length === 0 || v.length >= ${op.value}, "${op.message}")`
-        break
-    }
-  }
-  switch (spec.tail) {
-    case "optional":
-      str += ".optional()"
-      break
-    case "requiredNumber":
-      str += `.optional().refine((v) => v !== undefined, "This field is required")`
-      break
-    case "none":
-      break
-  }
-  return str
-}
-
 /** The type default for a field, ignoring any configured `defaultValue`. */
 function fieldTypeDefault(field: SpecField): unknown {
   switch (field.type) {
@@ -334,7 +283,7 @@ export function serializeDefault(value: unknown): string {
 // `yyyy-MM-dd` strings are parsed with `parseISO` (local midnight) to match how
 // react-day-picker compares calendar days.
 
-interface DateConstraint {
+export interface DateConstraint {
   /** Predicate for the live schema. */
   live: (d: Date) => boolean
   /** Equivalent boolean expression over a Date-valued variable, for codegen. */
@@ -346,7 +295,7 @@ function humanDate(iso: string): string {
   return format(parseISO(iso), "PPP")
 }
 
-function dateConstraints(field: DateField): DateConstraint[] {
+export function dateConstraints(field: DateField): DateConstraint[] {
   const cs: DateConstraint[] = []
   if (field.minDate) {
     const iso = field.minDate
@@ -419,33 +368,6 @@ export function dateLiveSchema(field: DateField): z.ZodTypeAny {
 interface DateRangeValueDates {
   from?: Date
   to?: Date
-}
-
-/** Emits the Zod source string for a date field (mirror of the live schema). */
-export function dateZodString(field: DateField): string {
-  const cs = dateConstraints(field)
-  if (field.mode === "range") {
-    let s =
-      "z.object({ from: z.date().optional(), to: z.date().optional() }).optional()"
-    if (field.required)
-      s +=
-        '.refine((v) => !!v && v.from !== undefined && v.to !== undefined, "Please select a date range")'
-    for (const c of cs)
-      s += `.refine((v) => !v || ((v.from === undefined || (${c.expr(
-        "v.from"
-      )})) && (v.to === undefined || (${c.expr("v.to")}))), ${JSON.stringify(
-        c.message
-      )})`
-    return s
-  }
-  let s = "z.date().optional()"
-  if (field.required)
-    s += '.refine((v) => v !== undefined, "This field is required")'
-  for (const c of cs)
-    s += `.refine((v) => v === undefined || (${c.expr("v")}), ${JSON.stringify(
-      c.message
-    )})`
-  return s
 }
 
 /** The live default value for a date field (Date objects, for the preview). */

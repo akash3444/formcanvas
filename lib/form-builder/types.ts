@@ -1,6 +1,14 @@
 /** Form libraries the builder can emit code and render the live preview for. */
 export type FormLibrary = "react-hook-form" | "tanstack-form"
 
+/**
+ * Schema libraries the builder can emit validation code for. Orthogonal to the
+ * Form Library — it changes only the schema block, its imports, and (for React
+ * Hook Form) the resolver. The live preview always validates with Zod
+ * regardless of this choice (see docs/adr/0001). Zod is the default.
+ */
+export type SchemaLibrary = "zod" | "valibot" | "arktype"
+
 export type FieldType =
   | "input"
   | "password"

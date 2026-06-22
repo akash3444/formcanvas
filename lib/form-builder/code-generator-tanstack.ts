@@ -1,5 +1,6 @@
 import type {
   FormField,
+  SchemaLibrary,
   InputField,
   PasswordField,
   TextareaField,
@@ -26,9 +27,9 @@ import {
   comboboxCodegenParts,
   buildImports,
   buildOptionsSection,
-  buildSchemaBlock,
   buildDefaultValueLines,
 } from "./codegen-shared"
+import { getEmitter } from "./schema-emitters"
 
 /**
  * TanStack Form generator. Shares the Zod schema, options constants, labels,
@@ -426,18 +427,24 @@ ${bindings}
   }
 }
 
-/** Generates a TanStack Form + Zod form component. */
+/**
+ * Generates a TanStack Form component for the given schema library. TanStack
+ * consumes the schema as a Standard Schema, so unlike React Hook Form it needs
+ * no resolver — only the emitter's imports and schema block vary.
+ */
 export function generateTanstackFormCode(
   formName: string,
   submitLabel: string,
-  fields: FormField[]
+  fields: FormField[],
+  schemaLibrary: SchemaLibrary
 ): string {
   const pascal = toPascalCase(formName) || "My"
   const camel = pascal.charAt(0).toLowerCase() + pascal.slice(1)
+  const emitter = getEmitter(schemaLibrary)
 
   const imports = buildImports(fields, [
     'import { useForm } from "@tanstack/react-form"',
-    'import { z } from "zod"',
+    ...emitter.imports,
   ])
 
   const fieldJSX = fields
@@ -446,7 +453,7 @@ export function generateTanstackFormCode(
 
   return `${imports}
 
-${buildOptionsSection(fields)}${buildSchemaBlock(camel, pascal, fields)}
+${buildOptionsSection(fields)}${emitter.schemaBlock(camel, pascal, fields)}
 
 export function ${pascal}Form() {
   const form = useForm({

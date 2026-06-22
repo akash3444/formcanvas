@@ -10,10 +10,18 @@ export function CodePanel() {
   const submitLabel = useFormBuilderStore((s) => s.submitLabel)
   const fields = useFormBuilderStore((s) => s.fields)
   const formLibrary = useFormBuilderStore((s) => s.formLibrary)
+  const schemaLibrary = useFormBuilderStore((s) => s.schemaLibrary)
   const visibleFields = useMemo(() => fields.filter((f) => !f.hidden), [fields])
   const files = useMemo(
-    () => generateFormCode(formName, submitLabel, visibleFields, formLibrary),
-    [formName, submitLabel, visibleFields, formLibrary]
+    () =>
+      generateFormCode(
+        formName,
+        submitLabel,
+        visibleFields,
+        formLibrary,
+        schemaLibrary
+      ),
+    [formName, submitLabel, visibleFields, formLibrary, schemaLibrary]
   )
   const [activeFilename, setActiveFilename] = useState<string | null>(null)
   const activeFile =
