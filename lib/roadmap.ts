@@ -33,12 +33,6 @@ export const ROADMAP_ITEMS: RoadmapItem[] = [
   },
   {
     status: "planned",
-    title: "More validation libraries",
-    description:
-      "Generate schemas with any Standard Schema library. Zod is supported today — Valibot and ArkType are next.",
-  },
-  {
-    status: "planned",
     title: "More presets",
     description:
       "A growing library of ready-made form templates to start from.",
@@ -57,6 +51,13 @@ export const ROADMAP_ITEMS: RoadmapItem[] = [
       "Step backward and forward through your changes with keyboard shortcuts, so you can experiment freely and recover from mistakes.",
   },
   // Shipped — most recent first
+  {
+    status: "shipped",
+    title: "Schema libraries",
+    description:
+      "Generate validation schemas with Zod, Valibot, or ArkType.",
+    date: "2026-06-22",
+  },
   {
     status: "shipped",
     title: "Date picker field",
